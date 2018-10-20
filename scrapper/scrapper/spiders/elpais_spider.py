@@ -3,6 +3,11 @@
 from scrapy import Spider, Request
 from scrapper.items import PropertyItem
 
+# cities = ['cali', 'jamundi', 'palmira']
+cities = ['cali']
+# types = ['casas', 'lotes', 'apartamentos', 'fincas-y-casas-campestres', 'apartaestudios']
+types = ['casas']
+
 
 class ElPaisSpider(Spider):
     name = "el_pais"
