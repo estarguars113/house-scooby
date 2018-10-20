@@ -3,14 +3,14 @@
 from scrapy import Spider, Request
 from scrapper.items import PropertyItem
 
+# cities = ['cali', 'jamundi', 'palmira']
+cities = ['cali']
+# types = ['casas', 'lotes', 'apartamentos', 'fincas-y-casas-campestres', 'apartaestudios']
+types = ['casas']
 
 class ElPaisSpider(Spider):
     name = "el_pais"
-    allowd_domains = ["fincaraiz.elpais.com.co"]
-    # cities = ['cali', 'jamundi', 'palmira']
-    cities = ['cali']
-    # types = ['casas', 'lotes', 'apartamentos', 'fincas-y-casas-campestres', 'apartaestudios']
-    types = ['casas']
+    allowed_domains = ["fincaraiz.elpais.com.co"]
     start_urls = [
         "https://fincaraiz.elpais.com.co/avisos/venta/{0}/{1}".format(t,c) for t in types for c in cities
     ]

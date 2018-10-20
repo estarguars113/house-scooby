@@ -2,15 +2,15 @@
 
 from scrapy import Spider, Request
 
+types = ['apartamento', 'casa-lote', 'casa-campestre', 'casa', 'lote', 'finca']
+cities = ['cali', 'jamundi', 'palmira']
+min_price = '60000000'
+max_price = '190000000'
+base_url = 'https://www.fincaraiz.com.co/{0}/venta/{1}/?ad=30|{2}||||1||8,21,23,7|||82|8200006|8200104|{3}|{4}||||||||||||||||1||griddate%20desc||||-1||'
 
 class FincaRaizSpider(Spider):
     name = "finca_raiz"
-    allowd_domains = ["fincaraiz.com.co"]
-    types = ['apartamento', 'casa-lote', 'casa-campestre', 'casa', 'lote', 'finca']
-    cities = ['cali', 'jamundi', 'palmira']
-    min_price = '60000000'
-    max_price = '190000000'
-    base_url = 'https://www.fincaraiz.com.co/{0}/venta/{1}/?ad=30|{2}||||1||8,21,23,7|||82|8200006|8200104|{3}|{4}||||||||||||||||1||griddate%20desc||||-1||'
+    allowed_domains = ["fincaraiz.com.co"]
     start_urls = [
         base_url.format(t, c, i, min_price, max_price) 
         for t in types
