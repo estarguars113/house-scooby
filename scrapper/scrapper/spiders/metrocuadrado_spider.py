@@ -58,6 +58,6 @@ class MetroCuadradoSpider(Spider):
     def parse_single(self, response):
         item = response.meta['item']
         item['code'] = response.css(
-            'div.m_property_info_details dl:first-child h4::text').extract_first()
+            'div.m_property_info_details:not(.more_info)>dl:first-of-type dd>h4::text').extract_first()
 
         yield item
