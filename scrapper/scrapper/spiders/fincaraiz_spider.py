@@ -8,16 +8,25 @@ min_price = '60000000'
 max_price = '190000000'
 base_url = 'https://www.fincaraiz.com.co/{0}/venta/{1}/?ad=30|{2}||||1||8,21,23,7|||82|8200006|8200104|{3}|{4}||||||||||||||||1||griddate%20desc||||-1||'
 
+
 class FincaRaizSpider(Spider):
     name = "finca_raiz"
-    allowed_domains = ["fincaraiz.com.co"]
-    start_urls = [
-        base_url.format(t, c, i, min_price, max_price) 
-        for t in types
-        for c in cities
-        for i in range(1, 10)
-    ]
-
+    allowd_domains = ["fincaraiz.com.co"]
+    types = ['apartamento', 'casa-lote', 'casa-campestre', 'casa', 'lote', 'finca']
+    cities = ['cali', 'jamundi', 'palmira']
+    min_price = '60000000'
+    max_price = '190000000'
+   
+    def start_requests(self):
+        base_url = 'https://www.fincaraiz.com.co/{0}/venta/{1}/?ad=30|{2}||||1||8,21,23,7|||82|8200006|8200104|{3}|{4}||||||||||||||||1||griddate%20desc||||-1||'
+        for t in self.types:
+            for c in self.cities:
+                for i in range(1, 10):
+                    yield Request(
+                        base_url.format(t, c, i, self.min_price, self.max_price),
+                        self.parse
+                    )
+         
     def parse(self, response):
         for item in response.css('ul.advert'):
             # clean input data

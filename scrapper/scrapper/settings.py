@@ -56,12 +56,15 @@ RANDOMIZE_DOWNLOAD_DELAY = True
 #DOWNLOADER_MIDDLEWARES = {
 #    'scrapper.middlewares.ScrapperDownloaderMiddleware': 543,
 #}
+# After 10 drops the spider will be closed
+CLOSESPIDER_DROP_ITEM_COUNT = 10
 
 # Enable or disable extensions
 # See https://doc.scrapy.org/en/latest/topics/extensions.html
-#EXTENSIONS = {
-#    'scrapy.extensions.telnet.TelnetConsole': None,
-#}
+EXTENSIONS = {
+#   'scrapy.extensions.telnet.TelnetConsole': None,
+    'scrapy.extensions.closespider.CloseSpider': 500,
+}
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html

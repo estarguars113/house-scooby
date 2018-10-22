@@ -8,12 +8,20 @@ cities = ['cali']
 # types = ['casas', 'lotes', 'apartamentos', 'fincas-y-casas-campestres', 'apartaestudios']
 types = ['casas']
 
+
 class ElPaisSpider(Spider):
     name = "el_pais"
-    allowed_domains = ["fincaraiz.elpais.com.co"]
-    start_urls = [
-        "https://fincaraiz.elpais.com.co/avisos/venta/{0}/{1}".format(t,c) for t in types for c in cities
-    ]
+    allowd_domains = ["fincaraiz.elpais.com.co"]
+    # cities = ['cali', 'jamundi', 'palmira']
+    cities = ['cali']
+    # types = ['casas', 'lotes', 'apartamentos', 'fincas-y-casas-campestres', 'apartaestudios']
+    types = ['casas']
+
+    def start_requests(self):
+        base_url = "https://fincaraiz.elpais.com.co/avisos/venta/{0}/{1}"
+        for t in self.types:
+            for c in self.cities:
+                yield Request(base_url.format(t, c), self.parse)
 
     def parse(self, response):
         for item in response.css('article.flexArticle'):
