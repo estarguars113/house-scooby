@@ -1,31 +1,27 @@
 # -*- coding: utf-8 -*-
 
 from scrapy import Spider, Request
-
-types = ['apartamento', 'casa-lote', 'casa-campestre', 'casa', 'lote', 'finca']
-cities = ['cali', 'jamundi', 'palmira']
-min_price = '60000000'
-max_price = '190000000'
-base_url = 'https://www.fincaraiz.com.co/{0}/venta/{1}/?ad=30|{2}||||1||8,21,23,7|||82|8200006|8200104|{3}|{4}||||||||||||||||1||griddate%20desc||||-1||'
+import re
 
 
 class FincaRaizSpider(Spider):
     name = "finca_raiz"
     allowd_domains = ["fincaraiz.com.co"]
-    types = ['apartamento', 'casa-lote', 'casa-campestre', 'casa', 'lote', 'finca']
-    cities = ['cali', 'jamundi', 'palmira']
+    # types = ['apartamento', 'casa-lote', 'casa-campestre', 'casa', 'lote', 'finca']
+    types = ['casa']
+    cities = ['cali']
+    # cities = ['cali', 'jamundi', 'palmira']
     min_price = '60000000'
     max_price = '190000000'
    
     def start_requests(self):
-        base_url = 'https://www.fincaraiz.com.co/{0}/venta/{1}/?ad=30|{2}||||1||8,21,23,7|||82|8200006|8200104|{3}|{4}||||||||||||||||1||griddate%20desc||||-1||'
+        base_url = 'https://www.fincaraiz.com.co/{0}/venta/{1}/?ad=30|1||||1||8,21,23,7|||82|8200006|8200104|{2}|{3}||||||||||||||||1||griddate%20desc||||-1||'
         for t in self.types:
             for c in self.cities:
-                for i in range(1, 10):
-                    yield Request(
-                        base_url.format(t, c, i, self.min_price, self.max_price),
-                        self.parse
-                    )
+                yield Request(
+                    base_url.format(t, c, self.min_price, self.max_price),
+                    self.parse
+                )
          
     def parse(self, response):
         for item in response.css('ul.advert'):
@@ -53,9 +49,15 @@ class FincaRaizSpider(Spider):
                 'status': item.css('li.media .usedMark::text').extract_first() or 'Nuevo',
             }
 
-        # next_page = response.css('div.pagination a.link-pag:last-child::attr(href)').extract_first()
-        # if next_page is not None:
-        #     next_page = response.urljoin(next_page)
-        #     print('page')
-        #     print(next_page)
-        #     yield scrapy.Request(next_page, callback=self.parse)
+        current_url = response.request.url
+        next_page_pattern = r"(.*ad=30\|)(\d+)"
+        print(next_page_pattern)
+        next_page = str(
+            int(re.match(next_page_pattern, current_url).group(2)) + 1)
+
+        print('next: ' + next_page)
+
+        next_url = re.sub(next_page_pattern, fr'\g<1>{next_page}', current_url)
+        if next_url is not None:
+            next_url = response.urljoin(next_url)
+            yield Request(next_url, self.parse)
