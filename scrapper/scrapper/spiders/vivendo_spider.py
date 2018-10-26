@@ -46,7 +46,12 @@ class vivendoSpider(Spider):
         # to-do internal unique identifier
 
         # specific features
-        item['description'] = item.css('div.field-name-descripcion-custom  .field-item::text').extract()
-        item['surface'] = item.css('div.group-descripcion .field-items p.rtejustify:first-child()::text').extract_first()
-        item['location'] = item.css('#encabezado-izquierdo-texto .field-name-field-direccion .field-item::text').extract_first()
-            
+        item['description'] = response.css('div.field-name-descripcion-custom  .field-item::text').extract()
+        item['surface'] = response.css('div.group-descripcion .field-items p.rtejustify:first-child()::text').extract_first()
+        item['location'] = response.css('#encabezado-izquierdo-texto .field-name-field-direccion .field-item::text').extract_first()
+        item['city'] = response.css('#region-area-estado .field-name-field-ciudad .field-item::text').extract_first()
+        item['status'] = response.css('#region-area-estado .field-name-field-estados .field-item::text').extract_first()
+
+        # extract feature list
+        item['features'] = list(map(lambda x: x.strip(), response.css('.field-name-field-interiores .field-item::text').extract())
+        yield item
