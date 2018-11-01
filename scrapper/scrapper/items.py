@@ -66,7 +66,10 @@ class PropertyItem(Item):
         output_processor=Join()
 
     )
-
+    stratum = Field(
+        input_processor=MapCompose(extract_digits),
+        output_processor=TakeFirst()
+    )
     features = Field()
     other_features = Field()
     contact_info = Field()
