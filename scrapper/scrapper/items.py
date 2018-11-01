@@ -43,7 +43,7 @@ class PropertyItem(Item):
     )
     surface = Field(
         input_processor=MapCompose(extract_digits),
-        output_processor=TakeFirst()
+        output_processor=Identity()
     )
     neighborhood = Field(
         input_processor=MapCompose(strip_spaces),
@@ -54,6 +54,12 @@ class PropertyItem(Item):
     description = Field(
         input_processor=MapCompose(remove_tags),
         output_proccesor=Identity()
+    )
+
+    responsible = Field(
+        input_processor=MapCompose(strip_spaces),
+        output_processor=Join()
+
     )
 
     features = Field()

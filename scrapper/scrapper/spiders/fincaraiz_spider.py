@@ -51,7 +51,6 @@ class FincaRaizSpider(Spider):
 
         current_url = response.request.url
         next_page_pattern = r"(.*ad=30\|)(\d+)"
-        print(next_page_pattern)
         next_page = str(
             int(re.match(next_page_pattern, current_url).group(2)) + 1)
 
