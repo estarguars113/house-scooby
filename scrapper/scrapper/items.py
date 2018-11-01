@@ -21,6 +21,10 @@ class PropertyItem(Item):
         input_processor=MapCompose(strip_spaces, remove_tags),
         output_processor=TakeFirst()
     )
+    name = Field(
+        input_processor=MapCompose(strip_spaces),
+        output_processor=Join()
+    )
     link = Field(
         input_processor=MapCompose(strip_spaces),
         output_processor=TakeFirst()
@@ -50,6 +54,7 @@ class PropertyItem(Item):
         output_processor=Join()
     )
     status = Field()
+    location = Field()
 
     description = Field(
         input_processor=MapCompose(remove_tags),
@@ -64,6 +69,7 @@ class PropertyItem(Item):
 
     features = Field()
     other_features = Field()
+    contact_info = Field()
     contact_phone = Field(
         input_processor=MapCompose(extract_digits),
         output_processor=Join()
