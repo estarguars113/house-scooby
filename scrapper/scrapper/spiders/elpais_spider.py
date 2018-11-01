@@ -3,24 +3,19 @@
 from scrapy import Spider, Request
 from scrapper.items import PropertyItem
 
-# cities = ['cali', 'jamundi', 'palmira']
-cities = ['cali']
-# types = ['casas', 'lotes', 'apartamentos', 'fincas-y-casas-campestres', 'apartaestudios']
-types = ['casas']
-
 
 class ElPaisSpider(Spider):
     name = "el_pais"
     allowd_domains = ["fincaraiz.elpais.com.co"]
-    # cities = ['cali', 'jamundi', 'palmira']
-    cities = ['cali']
-    # types = ['casas', 'lotes', 'apartamentos', 'fincas-y-casas-campestres', 'apartaestudios']
-    types = ['casas']
+    # CITIES = ['cali', 'jamundi', 'palmira']
+    CITIES = ['cali']
+    # TYPES = ['casas', 'lotes', 'apartamentos', 'fincas-y-casas-campestres', 'apartaestudios']
+    TYPES = ['casas']
 
     def start_requests(self):
         base_url = "https://fincaraiz.elpais.com.co/avisos/venta/{0}/{1}"
-        for t in self.types:
-            for c in self.cities:
+        for t in self.TYPES:
+            for c in self.CITIES:
                 yield Request(base_url.format(t, c), self.parse)
 
     def parse(self, response):
