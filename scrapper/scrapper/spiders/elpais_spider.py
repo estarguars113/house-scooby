@@ -2,6 +2,7 @@
 
 from scrapy import Spider, Request
 from scrapper.items import PropertyItem
+import re
 
 
 class ElPaisSpider(Spider):
@@ -50,18 +51,18 @@ class ElPaisSpider(Spider):
         item['internal_id'] = response.css('.id-web p.id').extract_first().split(':')[1]
 
         # general desc
-        item['description'] = response.css('div.descripcion p::text').extract_first()
+        description = response.css('div.descripcion p::text').extract_first()
         item['contact_info'] = response.css('div.info p::text').extract()
 
         # extract feature list
-        feature_names = list(map(lambda x: x.strip(), response.css('div.caract ul li strong::text').extract())) + \
-            list(map(lambda x: x.strip(), response.css('div.caract ul:nth-child(2) li strong::text').extract()))
-        feature_values = list(map(lambda x: x.strip(), response.css('div.caract ul li:not(strong)::text').extract())) + \
-            list(map(lambda x: x.strip(), response.css('div.caract ul:nth-child(2) li:not(strong)::text').extract()))
+        feature_names = list(map(lambda x: x.strip().lower(), response.css('div.caract ul li strong::text').extract())) + \
+            list(map(lambda x: x.strip().lower(), response.css('div.caract ul:nth-child(2) li strong::text').extract()))
+        feature_values = list(map(lambda x: x.strip().lower(), response.css('div.caract ul li:not(strong)::text').extract())) + \
+            list(map(lambda x: x.strip().lower(), response.css('div.caract ul:nth-child(2) li:not(strong)::text').extract()))
 
         # remove empty values before create dict
         feature_values = [v for v in feature_values if v != '']
-        item['features'] = dict(zip(feature_names, feature_values))
+        item['features'] = list(dict(zip(feature_names, feature_values)).items())
 
         # process other features
         item['other_features'] = list(
@@ -74,7 +75,20 @@ class ElPaisSpider(Spider):
                     )
                 )
             )
-            
         )
+
+        # extract other features from description text
+        item['description'] = description
+        if('barrio' in feature_names):
+            item['neighborhood'] = features['barrio']
+        elif('barrio' in description):
+            item['neighborhood'] = re.match('(.*barrio )([\S]*)', description).group(1)
+        
+        if('ubicado en' in description or 'sector' in description):
+            item['location'] = re.match('(.*ubicado en|sector )([\S ]*)[.,]', description).group(2)
+
+        pattern = r"(.*estrato )(\d+)"
+        if 'estrato' in description:
+            item['stratum'] = int(re.match(pattern, description).group(2))
 
         yield item
