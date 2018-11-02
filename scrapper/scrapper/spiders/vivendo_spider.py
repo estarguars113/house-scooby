@@ -3,7 +3,7 @@
 from scrapy import Spider, Request
 from scrapy.loader import ItemLoader
 import re
-from items import PropertyItem
+from scrapper.items import PropertyItem
 
 ZONES = ['cali-y-region-sur-occidente']
 CITIES = ['cali', 'jamundi']
@@ -29,7 +29,7 @@ class vivendoSpider(Spider):
             property_item = ItemLoader(item=PropertyItem(), response=response)
             property_url = response.urljoin(item.css('div.views-field-title a::attr(href)').extract_first())
 
-            property_item.add_css('link', property_url)
+            property_item.add_value('link', property_url)
             property_item.add_css('name', 'div.views-field-title a::text')
             property_item.add_css('responsible', 'div.views-field-field-constructora a::text')
             property_item.add_css('price', '.image .priceCap span::text')
@@ -38,31 +38,34 @@ class vivendoSpider(Spider):
 
             # call single element page
             request = Request(property_url, self.parse_single)
-            request.meta['item'] = property_item
+            request.meta['loader'] = property_item
             yield request
 
     def parse_single(self, response):
-        item = response.meta['item']
+        item = response.meta['loader']
 
         # to-do internal unique identifier
 
         # specific features
-        description = response.css('div.field-name-descripcion-custom  .field-item::text').extract()
-        item['description'] = description
-        item['surface'] = response.css('div.field-name-field-area-privada .field-item::text').extract_first()
-        item['city'] = response.css('#region-area-estado .field-name-field-ciudad .field-item::text').extract_first()
-        item['status'] = response.css('#region-area-estado .field-name-field-estados .field-item::text').extract_first()
+        description = response.css('div.field-name-descripcion-custom  .field-item::text').extract_first()
+        item.add_value('description', description)
+        item.add_css('surface','div.field-name-field-area-privada .field-item::text')
+        item.add_css('city','#region-area-estado .field-name-field-ciudad .field-item::text')
+        item.add_css('status','#region-area-estado .field-name-field-estados .field-item::text')
 
         # extract features from string
         pattern = r"(.*estrato )(\d+)"
         if 'estrato' in description:
-            item['stratum'] = int(re.match(pattern, description).group(2))
+            value = re.match(pattern, description).group(2)
+            if value:
+                item.add_value('stratum', value)
        
         if('ubicado en' in description or 'sector' in description):
-            location = re.match('(.*ubicado en|sector )([\S ]*)[.,]', description).group(2)
-            item['location'] = response.css('#encabezado-izquierdo-texto .field-name-field-direccion .field-item::text').extract_first() or location
+            location = re.match('(.*ubicado en|sector )([\S ]*)[.,]', description).group(2) or \
+                        response.css('#encabezado-izquierdo-texto .field-name-field-direccion .field-item::text').extract_first()
+            item.add_value('location', location)
 
         # extract feature list
-        item['features'] = list(map(lambda x: x.strip(), response.css('.field-name-field-interiores .field-item::text').extract()))
+        item.add_value('features',  list(map(lambda x: x.strip(), response.css('.field-name-field-interiores .field-item::text').extract())))
         
-        yield item
+        yield item.load_item()
