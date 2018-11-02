@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from scrapy import Spider, Request
+from scrapy.loader import ItemLoader
 import re
 from items import PropertyItem
 
@@ -25,15 +26,15 @@ class vivendoSpider(Spider):
 
     def parse(self, response):
         for item in response.css('div.view-lista-proyectos div.views-row'):
-            property_item = PropertyItem()
+            property_item = ItemLoader(item=PropertyItem(), response=response)
             property_url = response.urljoin(item.css('div.views-field-title a::attr(href)').extract_first())
 
-            property_item['link'] = property_url
-            property_item['name'] = item.css('div.views-field-title a::text').extract_first()
-            property_item['responsible'] = item.css('div.views-field-field-constructora a::text').extract_first()
-            property_item['price'] = item.css('.image .priceCap span::text').extract_first()
-            property_item['bathrooms'] = item.css('.views-field-field-banos>div::text').extract_first()
-            property_item['bedrooms'] = item.css('.views-field-field-alcobas>div::text').extract_first()
+            property_item.add_css('link', property_url)
+            property_item.add_css('name', 'div.views-field-title a::text')
+            property_item.add_css('responsible', 'div.views-field-field-constructora a::text')
+            property_item.add_css('price', '.image .priceCap span::text')
+            property_item.add_css('bathrooms', '.views-field-field-banos>div::text')
+            property_item.add_css('bedrooms', '.views-field-field-alcobas>div::text')
 
             # call single element page
             request = Request(property_url, self.parse_single)
