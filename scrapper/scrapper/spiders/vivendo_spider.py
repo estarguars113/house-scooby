@@ -2,7 +2,7 @@
 
 from scrapy import Spider, Request
 import re
-from scrapper.items import PropertyItem
+from items import PropertyItem
 
 ZONES = ['cali-y-region-sur-occidente']
 CITIES = ['cali', 'jamundi']
