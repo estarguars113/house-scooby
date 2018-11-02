@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from scrapy import Spider, Request
-from scrapper.items import PropertyItem
+from items import PropertyItem
 import re
 
 

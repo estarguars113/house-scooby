@@ -61,7 +61,7 @@ class PropertyItem(Item):
     location = Field()
 
     description = Field(
-        input_processor=MapCompose(remove_tags),
+        input_processor=MapCompose(strip_spaces, remove_tags),
         output_proccesor=Identity()
     )
 
