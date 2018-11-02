@@ -54,15 +54,12 @@ class vivendoSpider(Spider):
 
         # extract features from string
         pattern = r"(.*estrato )(\d+)"
-        stratum = -1
         if 'estrato' in description:
-            stratum = int(re.match(pattern, description).group(2))
-        item['stratum'] = stratum
-
-        location = ''
+            item['stratum'] = int(re.match(pattern, description).group(2))
+       
         if('ubicado en' in description or 'sector' in description):
             location = re.match('(.*ubicado en|sector )([\S ]*)[.,]', description).group(2)
-        item['location'] = response.css('#encabezado-izquierdo-texto .field-name-field-direccion .field-item::text').extract_first() or location
+            item['location'] = response.css('#encabezado-izquierdo-texto .field-name-field-direccion .field-item::text').extract_first() or location
 
         # extract feature list
         item['features'] = list(map(lambda x: x.strip(), response.css('.field-name-field-interiores .field-item::text').extract()))
