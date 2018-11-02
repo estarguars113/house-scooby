@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from scrapy import Spider, Request
+from scrapy.shell import inspect_response
+from scrapper.items import PropertyItem
 import re
+import sys
 
 
 class FincaRaizSpider(Spider):
@@ -38,25 +41,51 @@ class FincaRaizSpider(Spider):
             full_location = item.css('li.title-grid .span-title>a>div:last-child::text').extract_first()
             neighborhood, city = full_location.split('-') if full_location else ["", ""]
 
-            yield {
-                'link':  response.urljoin(item.css('li.title-grid .span-title>a::attr(href)').extract_first()),
-                'description': description,
-                'surface':  surface,
-                'price':    price,
-                'rooms': item.css('li.surface>div::text').extract_first(),
-                'neighborhood': neighborhood,
-                'city': city,
-                'status': item.css('li.media .usedMark::text').extract_first() or 'Nuevo',
-            }
+            property_item = PropertyItem()
+            property_url = response.urljoin(item.css('li.title-grid .span-title>a::attr(href)').extract_first())
+            property_item['link'] = property_url
+            property_item['description'] = description
+            property_item['surface'] = surface
+            property_item['price'] = price
+            property_item['bedrooms'] = item.css('li.surface>div::text').extract_first()
+            property_item['neighborhood'] = neighborhood
+            property_item['city'] = city
+
+            # call single element page
+            request = Request(property_url, self.parse_single)
+            request.meta['item'] = property_item
+            yield request
 
         current_url = response.request.url
         next_page_pattern = r"(.*ad=30\|)(\d+)"
         next_page = str(
             int(re.match(next_page_pattern, current_url).group(2)) + 1)
 
-        print('next: ' + next_page)
-
         next_url = re.sub(next_page_pattern, fr'\g<1>{next_page}', current_url)
         if next_url is not None:
             next_url = response.urljoin(next_url)
             yield Request(next_url, self.parse)
+
+    def parse_single(self, response):
+        item = response.meta['item']
+
+        item['internal_id'] = response.css('h2.description>span::text').extract_first()
+        item['status'] = response.css('div.badge_used::text').extract_first()
+
+        features = '-'.join(response.css('div.features_2 li::text').extract())
+        if('Estrato' in features):
+            pattern = r"(.*Estrato:|)(\d+)[-]"
+            item['stratum'] = int(re.match(pattern, features).group(2))
+
+        if('Antigüedad' in features):
+            pattern = r"(.*Antigüedad:|)(\d+)[-]"
+            item['antiquity'] = int(re.match(pattern, features).group(2))
+
+        if('Piso' in features):
+            pattern = r"(.*Piso No::|)(\d+)[-]"
+            item['floor_location'] = int(re.match(pattern, features).group(2))
+
+        # extract text 
+        item['description'] = response.css('.description p::text').extract_first()
+
+        yield item
