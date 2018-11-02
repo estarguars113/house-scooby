@@ -45,6 +45,10 @@ class PropertyItem(Item):
         input_processor=MapCompose(extract_digits),
         output_processor=TakeFirst()
     )
+    parking_spots = Field(
+        input_processor=MapCompose(extract_digits),
+        output_processor=TakeFirst()
+    )
     surface = Field(
         input_processor=MapCompose(extract_digits),
         output_processor=Identity()
@@ -64,7 +68,6 @@ class PropertyItem(Item):
     responsible = Field(
         input_processor=MapCompose(strip_spaces),
         output_processor=Join()
-
     )
     stratum = Field(
         input_processor=MapCompose(extract_digits),
@@ -72,6 +75,14 @@ class PropertyItem(Item):
     )
     features = Field()
     other_features = Field()
+    floor_location =  Field(
+        input_processor=MapCompose(extract_digits),
+        output_processor=Identity()
+    )
+    antiquity = Field(
+        input_processor=MapCompose(extract_digits),
+        output_processor=Identity()
+    )
     contact_info = Field()
     contact_phone = Field(
         input_processor=MapCompose(extract_digits),
