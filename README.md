@@ -10,7 +10,11 @@ Python based  web scrapper
     source env/bin/activate
     pip install -r requirements.txt
     cd scrapper/
+    ## single spider
     scrapy crawl finca_raiz
+
+    ## all the spiders
+    python scrapper/runner.py 
  ```
 
 ## Resources ##
