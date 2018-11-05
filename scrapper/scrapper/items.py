@@ -28,7 +28,7 @@ class PropertyItem(Item):
     )
     name = Field(
         input_processor=MapCompose(strip_spaces, remove_accents),
-        output_processor=Join()
+        output_processor=TakeFirst()
     )
     link = Field(
         input_processor=MapCompose(strip_spaces),
@@ -56,7 +56,7 @@ class PropertyItem(Item):
     )
     surface = Field(
         input_processor=MapCompose(extract_digits),
-        output_processor=TakeFirst()
+        output_processor=Identity()
     )
     neighborhood = Field(
         input_processor=MapCompose(strip_spaces),
@@ -72,7 +72,7 @@ class PropertyItem(Item):
 
     responsible = Field(
         input_processor=MapCompose(strip_spaces, remove_accents, remove_tags),
-        output_processor=Join()
+        output_processor=TakeFirst()
     )
     stratum = Field(
         input_processor=MapCompose(extract_digits),

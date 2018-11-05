@@ -32,7 +32,7 @@ class vivendoSpider(Spider):
             property_url = response.urljoin(item.css('div.views-field-title a::attr(href)').extract_first())
 
             property_item.add_value('link', property_url)
-            property_item.add_css('responsible', 'div.views-field-field-constructora a::text')
+            property_item.add_css('responsible', 'div.address::text')
             property_item.add_css('price', '.image .priceCap span::text')
             property_item.add_css('bathrooms', '.views-field-field-banos>div::text')
             property_item.add_css('bedrooms', '.views-field-field-alcobas>div::text')
@@ -58,9 +58,10 @@ class vivendoSpider(Spider):
         # extract features from string
         pattern = r"(.*estrato )(\d+)"
         if 'estrato' in description:
-            value = re.match(pattern, description).group(2)
-            if value:
-                item.add_value('stratum', value)
+            if(re.match(pattern, description)):
+                value = re.match(pattern, description).group(2)
+                if value:
+                    item.add_value('stratum', value)
        
         if('ubicado en' in description or 'sector' in description):
             location = re.match('(.*ubicado en|sector )([\S ]*)[.,]', description).group(2) or \
