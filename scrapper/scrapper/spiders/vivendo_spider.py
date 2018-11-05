@@ -32,7 +32,6 @@ class vivendoSpider(Spider):
             property_url = response.urljoin(item.css('div.views-field-title a::attr(href)').extract_first())
 
             property_item.add_value('link', property_url)
-            property_item.add_css('name', 'div.views-field-title a::text')
             property_item.add_css('responsible', 'div.views-field-field-constructora a::text')
             property_item.add_css('price', '.image .priceCap span::text')
             property_item.add_css('bathrooms', '.views-field-field-banos>div::text')
@@ -51,6 +50,7 @@ class vivendoSpider(Spider):
         # specific features
         description = response.css('div.field-name-descripcion-custom  .field-item::text').extract_first()
         item.add_value('description', description)
+        item.add_css('name', 'h2.titulo_proyecto::text')
         item.add_css('surface','div.field-name-field-area-privada .field-item::text')
         item.add_css('city','#region-area-estado .field-name-field-ciudad .field-item::text')
         item.add_css('status','#region-area-estado .field-name-field-estados .field-item::text')
