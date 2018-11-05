@@ -10,7 +10,7 @@ import unicodedata
 
 # cleaning and extracting utilities
 def strip_spaces(input):
-    return input.strip('\r\n ')
+    return input.strip('\r\n\t ')
 
 
 def extract_digits(input):
@@ -56,7 +56,7 @@ class PropertyItem(Item):
     )
     surface = Field(
         input_processor=MapCompose(extract_digits),
-        output_processor=Identity()
+        output_processor=TakeFirst()
     )
     neighborhood = Field(
         input_processor=MapCompose(strip_spaces),
@@ -67,7 +67,7 @@ class PropertyItem(Item):
 
     description = Field(
         input_processor=MapCompose(remove_tags, remove_accents, strip_spaces),
-        output_proccesor=Identity()
+        output_proccesor=TakeFirst()
     )
 
     responsible = Field(
@@ -78,7 +78,10 @@ class PropertyItem(Item):
         input_processor=MapCompose(extract_digits),
         output_processor=TakeFirst()
     )
-    features = Field()
+    features = Field(
+        input_processor=MapCompose(strip_spaces, remove_accents, remove_tags),
+        output_processor=Join()
+    )
     other_features = Field()
     floor_location = Field(
         input_processor=MapCompose(extract_digits),
