@@ -106,6 +106,8 @@ venv.bak/
 # output generated files
 scrapper/*.json
 scrapper/*.csv
+scrapper/scrapper/*.json
+scrapper/scrapper/*.csv
 
 # editor settings
 .vscode/*

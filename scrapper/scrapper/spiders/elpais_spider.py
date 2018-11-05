@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from scrapy import Spider, Request
-from items import PropertyItem
+from scrapy.loader import ItemLoader
 import re
+
+# custom item definition
+from scrapper.items import PropertyItem
 
 
 class ElPaisSpider(Spider):
@@ -21,22 +24,22 @@ class ElPaisSpider(Spider):
 
     def parse(self, response):
         for item in response.css('article.flexArticle'):
-            property_item = PropertyItem()
+            property_item = ItemLoader(item=PropertyItem(), response=response)
             full_description = item.css('div.info div.description::text').extract_first()
             city, rooms, bathrooms, surface = full_description.split(', ') if full_description else ['', 0, 0, 0]
             property_url = response.urljoin(item.css('div.info>a.link-info::attr(href)').extract_first())
             
             # fill properties
-            property_item['link'] = property_url
-            property_item['surface'] = surface
-            property_item['price'] = item.css('div.info div.price::text').extract_first()
-            property_item['bedrooms'] = rooms
-            property_item['bathrooms'] = bathrooms
-            property_item['city'] = city
+            property_item.add_value('link', property_url)
+            property_item.add_value('surface', surface)
+            property_item.add_css('price', 'div.info div.price::text')
+            property_item.add_value('bedrooms', rooms)
+            property_item.add_value('bathrooms', bathrooms)
+            property_item.add_value('city', city)
 
             # call single element page
             request = Request(property_url, self.parse_single)
-            request.meta['item'] = property_item
+            request.meta['loader'] = property_item
             yield request
 
         next_page = response.css('nav.pagination-box>ul.pagination>li.next>a::attr(href)').extract_first()
@@ -45,14 +48,15 @@ class ElPaisSpider(Spider):
             yield Request(next_page, callback=self.parse)
 
     def parse_single(self, response):
-        item = response.meta['item']
+        item = response.meta['loader']
 
         # internal unique identifier
-        item['internal_id'] = response.css('.id-web p.id').extract_first().split(':')[1]
+        internal_id = response.css('.id-web p.id').extract_first().split(':')[1]
+        item.add_value('internal_id', internal_id)
 
         # general desc
         description = response.css('div.descripcion p::text').extract_first()
-        item['contact_info'] = response.css('div.info p::text').extract()
+        item.add_css('contact_info', 'div.info p::text')
 
         # extract feature list
         feature_names = list(map(lambda x: x.strip().lower(), response.css('div.caract ul li strong::text').extract())) + \
@@ -62,10 +66,11 @@ class ElPaisSpider(Spider):
 
         # remove empty values before create dict
         feature_values = [v for v in feature_values if v != '']
-        item['features'] = list(dict(zip(feature_names, feature_values)).items())
+        features = list(dict(zip(feature_names, feature_values)).items())
+        item.add_value('features', features)
 
         # process other features
-        item['other_features'] = list(
+        other_features = list(
             filter(
                 (lambda x: x != ''),
                 list(
@@ -76,19 +81,20 @@ class ElPaisSpider(Spider):
                 )
             )
         )
+        item.add_value('other_features', other_features)
 
         # extract other features from description text
-        item['description'] = description
+        item.add_value('description', description)
         if('barrio' in feature_names):
-            item['neighborhood'] = features['barrio']
+            item.add_value('neighborhood', features['barrio'])
         elif('barrio' in description):
-            item['neighborhood'] = re.match('(.*barrio )([\S]*)', description).group(1)
+            item.add_value('neighborhood', re.match('(.*barrio )([\S]*)', description).group(1))
         
         if('ubicado en' in description or 'sector' in description):
-            item['location'] = re.match('(.*ubicado en|sector )([\S ]*)[.,]', description).group(2)
+            item.add_value('location', re.match('(.*ubicado en|sector )([\S ]*)[.,]', description).group(2))
 
         pattern = r"(.*estrato )(\d+)"
         if 'estrato' in description:
-            item['stratum'] = int(re.match(pattern, description).group(2))
+            item.add_value('stratum', int(re.match(pattern, description).group(2)))
 
-        yield item
+        yield item.load_item()

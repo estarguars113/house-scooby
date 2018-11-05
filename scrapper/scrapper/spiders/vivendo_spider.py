@@ -3,6 +3,8 @@
 from scrapy import Spider, Request
 from scrapy.loader import ItemLoader
 import re
+
+# custom item definition
 from scrapper.items import PropertyItem
 
 ZONES = ['cali-y-region-sur-occidente']

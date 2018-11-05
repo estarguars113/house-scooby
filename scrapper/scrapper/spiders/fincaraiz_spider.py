@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from scrapy import Spider, Request
-from scrapy.shell import inspect_response
+from scrapy.loader import ItemLoader
 from scrapper.items import PropertyItem
 import re
 import sys
@@ -28,32 +28,32 @@ class FincaRaizSpider(Spider):
          
     def parse(self, response):
         for item in response.css('ul.advert'):
+            property_item = ItemLoader(item=PropertyItem(), response=response)
             # clean input data
             description = item.css('li.title-grid .span-title>a h2.h2-grid::text').extract_first() or \
                 item.css('li.information .title-grid a::attr(title)').extract_first()
+            property_item.add_value('description', description)
 
             surface = item.css('li.surface::text').extract_first() or \
                 item.css('li.information .title-grid .description::text').extract_first()
+            property_item.add_value('surface', surface)
 
             price = item.css('li.price div:first-child meta::attr(content)').extract_first() or \
                 item.css('li.information .title-grid .descriptionPrice::text').extract_first()
+            property_item.add_value('price', price)
 
             full_location = item.css('li.title-grid .span-title>a>div:last-child::text').extract_first()
             neighborhood, city = full_location.split('-') if full_location else ["", ""]
 
-            property_item = PropertyItem()
             property_url = response.urljoin(item.css('li.title-grid .span-title>a::attr(href)').extract_first())
-            property_item['link'] = property_url
-            property_item['description'] = description
-            property_item['surface'] = surface
-            property_item['price'] = price
-            property_item['bedrooms'] = item.css('li.surface>div::text').extract_first()
-            property_item['neighborhood'] = neighborhood
-            property_item['city'] = city
+            property_item.add_value('link', property_url)
+            property_item.add_css('bedrooms', 'li.surface>div::text')
+            property_item.add_value('neighborhood', neighborhood)
+            property_item.add_value('city', city)
 
             # call single element page
             request = Request(property_url, self.parse_single)
-            request.meta['item'] = property_item
+            request.meta['loader'] = property_item
             yield request
 
         current_url = response.request.url
@@ -67,25 +67,25 @@ class FincaRaizSpider(Spider):
             yield Request(next_url, self.parse)
 
     def parse_single(self, response):
-        item = response.meta['item']
+        item = response.meta['loader']
 
-        item['internal_id'] = response.css('h2.description>span::text').extract_first()
-        item['status'] = response.css('div.badge_used::text').extract_first()
+        item.add_css('internal_id', 'h2.description>span::text')
+        item.add_css('status', 'div.badge_used::text')
 
         features = '-'.join(response.css('div.features_2 li::text').extract())
         if('Estrato' in features):
             pattern = r"(.*Estrato:|)(\d+)[-]"
-            item['stratum'] = int(re.match(pattern, features).group(2))
+            item.add_value('stratum', int(re.match(pattern, features).group(2)))
 
         if('Antigüedad' in features):
             pattern = r"(.*Antigüedad:|)(\d+)[-]"
-            item['antiquity'] = int(re.match(pattern, features).group(2))
+            item.add_value('antiquity', int(re.match(pattern, features).group(2)))
 
         if('Piso' in features):
             pattern = r"(.*Piso No::|)(\d+)[-]"
-            item['floor_location'] = int(re.match(pattern, features).group(2))
+            item.add_value('floor_location', int(re.match(pattern, features).group(2)))
 
         # extract text 
-        item['description'] = response.css('.description p::text').extract_first()
+        item.add_css('description','.description p::text')
 
-        yield item
+        yield item.load_item()

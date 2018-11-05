@@ -61,7 +61,7 @@ class PropertyItem(Item):
     location = Field()
 
     description = Field(
-        input_processor=MapCompose(strip_spaces, remove_tags),
+        input_processor=MapCompose(remove_tags),
         output_proccesor=Identity()
     )
 
@@ -75,7 +75,7 @@ class PropertyItem(Item):
     )
     features = Field()
     other_features = Field()
-    floor_location =  Field(
+    floor_location = Field(
         input_processor=MapCompose(extract_digits),
         output_processor=Identity()
     )
