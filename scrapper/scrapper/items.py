@@ -9,11 +9,11 @@ from w3lib.html import remove_tags
 
 # cleaning and extracting utilities
 def strip_spaces(input):
-    return input.rstrip('\r\n ')
+    return input.strip('\r\n ')
 
 
 def extract_digits(input):
-    return re.findall(r'\b\d+\b', input)
+    return ''.join(re.findall(r'\b\d+\b', input))
 
 
 class PropertyItem(Item):
@@ -51,7 +51,7 @@ class PropertyItem(Item):
     )
     surface = Field(
         input_processor=MapCompose(extract_digits),
-        output_processor=Identity()
+        output_processor=TakeFirst()
     )
     neighborhood = Field(
         input_processor=MapCompose(strip_spaces),
@@ -61,7 +61,7 @@ class PropertyItem(Item):
     location = Field()
 
     description = Field(
-        input_processor=MapCompose(remove_tags),
+        input_processor=MapCompose(remove_tags, strip_spaces),
         output_proccesor=Identity()
     )
 

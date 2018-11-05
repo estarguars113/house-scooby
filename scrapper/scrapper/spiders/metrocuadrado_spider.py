@@ -3,16 +3,19 @@
 from scrapy import Spider, Request, FormRequest
 import re
 cities = ['cali', 'jamundi', 'palmira']
-max_price = '200000000'
 base_url = 'http://www.metrocuadrado.com/search/list/ajax?mvalorventa=0-{0}&mciudad={1}&mtiponegocio=venta&mtipoinmueble=casa;lote;apartamento&selectedLocationCategory=1&selectedLocationFilter=mciudad&currentPage=1&totalPropertiesCount=1410&totalUsedPropertiesCount=1366&totalNewPropertiesCount=44&sfh=1'
 
 
 class MetroCuadradoSpider(Spider):
     name = "metro_cuadrado"
     allowed_domains = ["metrocuadrado.com"]
-    start_urls = [base_url.format(max_price, c) for c in cities]
+
+    def __init__(self, max_prixe='10000000', **kwargs):
+        self.max_price = max_prixe
+        super().__init__(**kwargs)
 
     def start_requests(self):
+        self.start_urls = [base_url.format(self.max_price, c) for c in cities]
         return [FormRequest(url, method='POST', callback=self.parse) for url in self.start_urls]
 
     def parse(self, response):
