@@ -10,16 +10,13 @@ import unicodedata
 
 # cleaning and extracting utilities
 def strip_spaces(input):
-    return input.strip('\r\n\t ')
-
+    return input.strip('\r\n ')
 
 def extract_digits(input):
     return ''.join(re.findall(r'\b\d+\b', input))
 
-
 def remove_accents(input):
     return ''.join((c for c in unicodedata.normalize('NFD', input) if unicodedata.category(c) != 'Mn'))
-
 
 class PropertyItem(Item):
     internal_id = Field(

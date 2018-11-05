@@ -28,10 +28,13 @@ class MetroCuadradoSpider(Spider):
             property_item = ItemLoader(item=PropertyItem(), response=response)
             name = item.css(
                 'div.detail_wrap .m_rs_list_item_main .header h2::text').extract_first()
+            description = item.css(
+                'div.detail_wrap .m_rs_list_item_details .desc p:last-child::text').extract_first()
             city = name.split(' ')[-1]
 
             property_item.add_value('name', name)
             property_item.add_value('city', city)
+            property_item.add_value('description', description)
 
             property_url = response.urljoin(
                 item.css('div.detail_wrap .m_rs_list_item_main .header a.data-details-id::attr(href)').extract_first())
@@ -41,8 +44,7 @@ class MetroCuadradoSpider(Spider):
             property_item.add_css('bedrooms', 'div.detail_wrap .m_rs_list_item_main .price_desc .rooms span:nth-child(2)::text')
             property_item.add_css('bathrooms', 'div.detail_wrap .m_rs_list_item_main .price_desc .bathrooms span:nth-child(2)::text')
             property_item.add_css('price', 'div.detail_wrap .m_rs_list_item_main .price_desc p.price span:nth-child(2)::text')
-            property_item.add_css('description', 'div.detail_wrap .m_rs_list_item_details .desc p:last-child::text')
-            
+
             # call single element page
             request = Request(property_url, self.parse_single)
             request.meta['loader'] = property_item
@@ -60,7 +62,6 @@ class MetroCuadradoSpider(Spider):
     def parse_single(self, response):
         item = response.meta['loader']
         item.add_css('internal_id', 'div.m_property_info_details:not(.more_info)>dl:nth-child(2) dd>h4::text')
-        item.add_css('description', '#pDescription::text')
         item.add_css('neighborhood', 'div.m_property_info_details:not(.more_info)>dl:nth-child(3) dd>h4::text')
         item.add_css('stratum', 'div.m_property_info_details:not(.more_info)>dl:nth-child(4) dd>h4::text')
         item.add_css('surface', 'div.m_property_info_details:not(.more_info)>dl:nth-child(6) dd>h4::text')
