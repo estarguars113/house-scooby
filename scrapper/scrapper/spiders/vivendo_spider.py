@@ -14,7 +14,7 @@ TYPES = ['casas', 'lotes', 'apartamentos']
 
 class vivendoSpider(Spider):
     name = "vivendo"
-    allowd_domains = ["vivendo.co"]
+    allowed_domains = ["vivendo.co"]
 
     def start_requests(self):
         base_url = 'https://www.vivendo.co/resultados/{0}/{1}/zona-general/{2}/precio-general/'

@@ -9,13 +9,16 @@ import sys
 
 class FincaRaizSpider(Spider):
     name = "finca_raiz"
-    allowd_domains = ["fincaraiz.com.co"]
+    allowed_domains = ["fincaraiz.com.co"]
     # types = ['apartamento', 'casa-lote', 'casa-campestre', 'casa', 'lote', 'finca']
     types = ['casa']
     cities = ['cali']
     # cities = ['cali', 'jamundi', 'palmira']
-    min_price = '60000000'
-    max_price = '190000000'
+    min_price = '0'
+
+    def __init__(self, max_prixe='10000000', **kwargs):
+        self.max_price = max_prixe
+        super().__init__(**kwargs)
    
     def start_requests(self):
         base_url = 'https://www.fincaraiz.com.co/{0}/venta/{1}/?ad=30|1||||1||8,21,23,7|||82|8200006|8200104|{2}|{3}||||||||||||||||1||griddate%20desc||||-1||'

@@ -10,11 +10,11 @@ import unicodedata
 
 # cleaning and extracting utilities
 def strip_spaces(input):
-    return input
+    return input.strip('\r\n ')
 
 
 def extract_digits(input):
-    return re.findall(r'\b\d+\b', input)
+    return ''.join(re.findall(r'\b\d+\b', input))
 
 
 def remove_accents(input):
@@ -56,7 +56,7 @@ class PropertyItem(Item):
     )
     surface = Field(
         input_processor=MapCompose(extract_digits),
-        output_processor=Identity()
+        output_processor=TakeFirst()
     )
     neighborhood = Field(
         input_processor=MapCompose(strip_spaces),

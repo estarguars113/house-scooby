@@ -7,10 +7,9 @@ import re
 # custom item definition
 from scrapper.items import PropertyItem
 
-
 class ElPaisSpider(Spider):
     name = "el_pais"
-    allowd_domains = ["fincaraiz.elpais.com.co"]
+    allowed_domains = ["fincaraiz.elpais.com.co"]
     # CITIES = ['cali', 'jamundi', 'palmira']
     CITIES = ['cali']
     # TYPES = ['casas', 'lotes', 'apartamentos', 'fincas-y-casas-campestres', 'apartaestudios']
