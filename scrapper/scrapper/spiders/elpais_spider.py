@@ -30,7 +30,6 @@ class ElPaisSpider(Spider):
             
             # fill properties
             property_item.add_value('link', property_url)
-            property_item.add_value('surface', surface)
             property_item.add_css('price', 'div.info div.price::text')
             property_item.add_value('bedrooms', rooms)
             property_item.add_value('bathrooms', bathrooms)
@@ -58,15 +57,45 @@ class ElPaisSpider(Spider):
         item.add_css('contact_info', 'div.info p::text')
 
         # extract feature list
-        feature_names = list(map(lambda x: x.strip().lower(), response.css('div.caract ul li strong::text').extract())) + \
-            list(map(lambda x: x.strip().lower(), response.css('div.caract ul:nth-child(2) li strong::text').extract()))
-        feature_values = list(map(lambda x: x.strip().lower(), response.css('div.caract ul li:not(strong)::text').extract())) + \
-            list(map(lambda x: x.strip().lower(), response.css('div.caract ul:nth-child(2) li:not(strong)::text').extract()))
+        feature_names = list(map(lambda x: x.strip().lower()[:-1], response.css('div.caract ul li strong::text').extract())) + \
+            list(map(lambda x: x.strip().lower()[:-1], response.css('div.caract ul:nth-child(2) li strong::text').extract()))
+        # extract only odd values because of issue format getting values
+        feature_values = list(
+            map(
+                lambda x: x.strip().lower(),
+                response.css('div.caract ul li:not(strong)::text').extract())
+                
+        )[1::2] + \
+            list(
+                map(
+                    lambda x: x.strip().lower(),
+                    response.css('div.caract ul:nth-child(2) li:not(strong)::text').extract()
+                )
+            )[1::2]
 
         # remove empty values before create dict
         feature_values = [v for v in feature_values if v != '']
-        features = list(dict(zip(feature_names, feature_values)).items())
-        item.add_value('features', features)
+        features = dict(zip(feature_names, feature_values))
+        item.add_value('features', list(features.items()))
+
+        if('estrato' in features.keys()):
+            item.add_value('stratum', features['estrato'])
+        elif('estrato' in description):
+            item.add_value(
+                'stratum', 
+                re.match('(.*estrato )([\d]*)', description).group(1)
+            )
+
+        if('barrio' in features.keys()):
+            item.add_value('neighborhood', features['barrio'])
+        elif('barrio' in description):
+            item.add_value(
+                'neighborhood', 
+                re.match('(.*barrio )([\S]*)', description).group(1)
+            )
+
+        if('área' in features.keys()):
+            item.add_value('surface', features['área'])
 
         # process other features
         other_features = list(
@@ -84,16 +113,5 @@ class ElPaisSpider(Spider):
 
         # extract other features from description text
         item.add_value('description', description)
-        if('barrio' in feature_names):
-            item.add_value('neighborhood', features['barrio'])
-        elif('barrio' in description):
-            item.add_value('neighborhood', re.match('(.*barrio )([\S]*)', description).group(1))
-        
-        if('ubicado en' in description or 'sector' in description):
-            item.add_value('location', re.match('(.*ubicado en|sector )([\S ]*)[.,]', description).group(2))
-
-        pattern = r"(.*estrato )(\d+)"
-        if 'estrato' in description:
-            item.add_value('stratum', int(re.match(pattern, description).group(2)))
 
         yield item.load_item()
