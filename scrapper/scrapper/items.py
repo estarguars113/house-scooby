@@ -10,13 +10,24 @@ import unicodedata
 
 # cleaning and extracting utilities
 def strip_spaces(input):
-    return input.strip('\r\n ')
+    return input.strip('\r\n\t ')
+
 
 def extract_digits(input):
     return ''.join(re.findall(r'\b\d+\b', input))
 
+
+def extract_float(input):
+    return ''.join(re.findall(r'\d+\,\d+', input))
+
+
+def convert_lower(input):
+    return input.lower()
+
+
 def remove_accents(input):
     return ''.join((c for c in unicodedata.normalize('NFD', input) if unicodedata.category(c) != 'Mn'))
+
 
 class PropertyItem(Item):
     internal_id = Field(
@@ -52,7 +63,7 @@ class PropertyItem(Item):
         output_processor=TakeFirst()
     )
     surface = Field(
-        input_processor=MapCompose(extract_digits),
+        input_processor=MapCompose(extract_float),
         output_processor=TakeFirst()
     )
     neighborhood = Field(
@@ -75,18 +86,15 @@ class PropertyItem(Item):
         input_processor=MapCompose(extract_digits),
         output_processor=TakeFirst()
     )
-    features = Field(
-        input_processor=MapCompose(strip_spaces, remove_accents, remove_tags),
-        output_processor=Join()
-    )
+    features = Field()
     other_features = Field()
     floor_location = Field(
         input_processor=MapCompose(extract_digits),
-        output_processor=Identity()
+        output_processor=TakeFirst()
     )
     antiquity = Field(
-        input_processor=MapCompose(extract_digits),
-        output_processor=Identity()
+        input_processor=MapCompose(strip_spaces),
+        output_processor=TakeFirst()
     )
     contact_info = Field()
     contact_phone = Field(
