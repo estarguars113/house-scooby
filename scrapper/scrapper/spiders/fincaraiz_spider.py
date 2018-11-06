@@ -37,10 +37,6 @@ class FincaRaizSpider(Spider):
                 item.css('li.information .title-grid a::attr(title)').extract_first()
             property_item.add_value('description', description)
 
-            surface = item.css('li.surface::text').extract_first() or \
-                item.css('li.information .title-grid .description::text').extract_first()
-            property_item.add_value('surface', surface)
-
             price = item.css('li.price div:first-child meta::attr(content)').extract_first() or \
                 item.css('li.information .title-grid .descriptionPrice::text').extract_first()
             property_item.add_value('price', price)
@@ -71,24 +67,28 @@ class FincaRaizSpider(Spider):
 
     def parse_single(self, response):
         item = response.meta['loader']
+        item.add_value(
+            'internal_id',
+            response.css('h2.description>span::text').extract_first()
+        )
+        item.add_value(
+            'status',
+            response.css('div.badge_used::text').extract_first()
+        )
 
-        item.add_css('internal_id', 'h2.description>span::text')
-        item.add_css('status', 'div.badge_used::text')
+        feature_names = response.css('div.features_2 li>b::text').extract()
+        feature_values = response.css('div.features_2 li::text').extract()
+        features_dict = dict(zip(feature_names, feature_values))
+        if('Estrato:' in feature_names):
+            item.add_value('stratum', features_dict['Estrato:'])
 
-        features = '-'.join(response.css('div.features_2 li::text').extract())
-        if('Estrato' in features):
-            pattern = r"(.*Estrato:|)(\d+)[-]"
-            item.add_value('stratum', int(re.match(pattern, features).group(2)))
+        if('Antigüedad:' in feature_names):
+            item.add_value('antiquity', features_dict['Antigüedad:'])
 
-        if('Antigüedad' in features):
-            pattern = r"(.*Antigüedad:|)(\d+)[-]"
-            item.add_value('antiquity', int(re.match(pattern, features).group(2)))
-
-        if('Piso' in features):
-            pattern = r"(.*Piso No::|)(\d+)[-]"
-            item.add_value('floor_location', int(re.match(pattern, features).group(2)))
+        if('Área privada:' in feature_names):
+            item.add_value('surface', features_dict['Área privada:'])
 
         # extract text 
-        item.add_css('description','.description p::text')
+        item.add_value('description', response.css('.description p::text').extract_first())
 
         yield item.load_item()
