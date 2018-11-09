@@ -29,6 +29,7 @@ def remove_accents(input):
     return ''.join((c for c in unicodedata.normalize('NFD', input) if unicodedata.category(c) != 'Mn'))
 
 
+
 class PropertyItem(Item):
     internal_id = Field(
         input_processor=MapCompose(strip_spaces, remove_tags),
@@ -74,8 +75,8 @@ class PropertyItem(Item):
     location = Field()
 
     description = Field(
-        input_processor=MapCompose(remove_tags, remove_accents, strip_spaces),
-        output_proccesor=TakeFirst()
+        input_processor=MapCompose(remove_tags, convert_lower, remove_accents, strip_spaces),
+        output_proccesor=Identity()
     )
 
     responsible = Field(

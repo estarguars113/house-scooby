@@ -7,6 +7,7 @@ import re
 # custom item definition
 from scrapper.items import PropertyItem
 
+
 class ElPaisSpider(Spider):
     name = "el_pais"
     allowed_domains = ["fincaraiz.elpais.com.co"]
@@ -23,7 +24,7 @@ class ElPaisSpider(Spider):
 
     def parse(self, response):
         for item in response.css('article.flexArticle'):
-            property_item = ItemLoader(item=PropertyItem(), response=response)
+            property_item = ItemLoader(item=PropertyItem(), response=response, selector=item)
             full_description = item.css('div.info div.description::text').extract_first()
             city, rooms, bathrooms, surface = full_description.split(', ') if full_description else ['', 0, 0, 0]
             property_url = response.urljoin(item.css('div.info>a.link-info::attr(href)').extract_first())
@@ -34,6 +35,7 @@ class ElPaisSpider(Spider):
             property_item.add_value('bedrooms', rooms)
             property_item.add_value('bathrooms', bathrooms)
             property_item.add_value('city', city)
+            property_item.add_value('surface', surface)
 
             # call single element page
             request = Request(property_url, self.parse_single)
@@ -59,6 +61,7 @@ class ElPaisSpider(Spider):
         # extract feature list
         feature_names = list(map(lambda x: x.strip().lower()[:-1], response.css('div.caract ul li strong::text').extract())) + \
             list(map(lambda x: x.strip().lower()[:-1], response.css('div.caract ul:nth-child(2) li strong::text').extract()))
+        
         # extract only odd values because of issue format getting values
         feature_values = list(
             map(
@@ -71,11 +74,12 @@ class ElPaisSpider(Spider):
                     lambda x: x.strip().lower(),
                     response.css('div.caract ul:nth-child(2) li:not(strong)::text').extract()
                 )
-            )[1::2]
+            )
 
         # remove empty values before create dict
         feature_values = [v for v in feature_values if v != '']
         features = dict(zip(feature_names, feature_values))
+        print(features)
         item.add_value('features', list(features.items()))
 
         if('estrato' in features.keys()):
