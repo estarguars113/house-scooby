@@ -10,24 +10,38 @@ import unicodedata
 
 # cleaning and extracting utilities
 def strip_spaces(input):
-    return input.strip('\r\n\t ')
+    if(isinstance(input, str)):
+        return input.strip('\r\n\t ')
+    else:
+        return list(map(strip_spaces, input))
 
 
 def extract_digits(input):
-    return ''.join(re.findall(r'\b\d+\b', input))
+    if(isinstance(input, str)):
+        return ''.join(re.findall(r'\b\d+\b', input))
+    else:
+        return list(map(extract_digits, input))
 
 
 def extract_float(input):
-    return ''.join(re.findall(r'\d+\,\d+', input))
+    if(isinstance(input, str)):
+        return ''.join(re.findall(r'\d+\,\d+', input))
+    else:
+        return list(map(extract_float, input))
 
 
 def convert_lower(input):
-    return input.lower()
+    if(isinstance(input, str)):
+        return input.lower()
+    else:
+        return list(map(convert_lower, input))
 
 
 def remove_accents(input):
-    return ''.join((c for c in unicodedata.normalize('NFD', input) if unicodedata.category(c) != 'Mn'))
-
+    if(isinstance(input, str)):
+        return ''.join((c for c in unicodedata.normalize('NFD', input) if unicodedata.category(c) != 'Mn'))
+    else:
+        return list(map(remove_accents, input))
 
 
 class PropertyItem(Item):
