@@ -10,7 +10,10 @@ import unicodedata
 
 # cleaning and extracting utilities
 def strip_spaces(input):
-    return input.strip('\r\n\t ')
+    if(isinstance(input, str)):
+        return input.strip('\r\n\t ')
+    elif(isinstance(input, list)):
+        return [i.strip('\r\n\t ') for i in input]
 
 
 def extract_digits(input):
@@ -22,13 +25,24 @@ def extract_float(input):
 
 
 def convert_lower(input):
+    if(isinstance(input, str)):
         return str(input).lower()
+    elif(isinstance(input, list)):
+        return [i.lower() for i in input]
 
 
 def remove_accents(input):
-    return ''.join(
-        (c for c in unicodedata.normalize('NFD', input) if unicodedata.category(c) != 'Mn')
-    )
+    if(isinstance(input, str)):
+        return ''.join(
+            (c for c in unicodedata.normalize('NFD', input) if unicodedata.category(c) != 'Mn')
+        )
+    elif(isinstance(input, list)):
+        return [remove_accents(c) for c in input]
+
+
+def join_lines(input):
+    return ''.join(input)
+
 
 class PropertyItem(Item):
     internal_id = Field(
@@ -75,8 +89,8 @@ class PropertyItem(Item):
     location = Field()
 
     description = Field(
-        input_processor=MapCompose(remove_tags, convert_lower, remove_accents, strip_spaces),
-        output_proccesor=Identity()
+        input_processor=Compose(strip_spaces, convert_lower, remove_accents),
+        output_processor=Join()
     )
 
     responsible = Field(

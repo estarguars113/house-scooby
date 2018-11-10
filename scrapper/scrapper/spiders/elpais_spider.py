@@ -49,7 +49,7 @@ class ElPaisSpider(Spider):
         item.add_value('internal_id', internal_id)
 
         # general desc
-        description = response.css('div.descripcion p::text').extract_first()
+        description = response.css('div.descripcion p::text').extract()
         item.add_css('contact_info', 'div.info p::text')
 
         # extract feature list
@@ -80,7 +80,6 @@ class ElPaisSpider(Spider):
                 zip(feature_names_2, feature_values_2)
             )}
        
-
         features_keys = features.keys()
         if('ciudad' in features_keys):
             item.add_value('city', features['ciudad'])
