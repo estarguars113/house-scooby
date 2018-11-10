@@ -24,19 +24,13 @@ class ElPaisSpider(Spider):
 
     def parse(self, response):
         for item in response.css('article.flexArticle'):
-            property_item = ItemLoader(item=PropertyItem(), response=response, selector=item)
-            full_description = item.css('div.info div.description::text').extract_first()
-            city, rooms, bathrooms, surface = full_description.split(', ') if full_description else ['', 0, 0, 0]
+            property_item = ItemLoader(
+                item=PropertyItem(),
+                response=response,
+                selector=item
+            )
             property_url = response.urljoin(item.css('div.info>a.link-info::attr(href)').extract_first())
-            
-            # fill properties
             property_item.add_value('link', property_url)
-            property_item.add_css('price', 'div.info div.price::text')
-            property_item.add_value('bedrooms', rooms)
-            property_item.add_value('bathrooms', bathrooms)
-            property_item.add_value('city', city)
-            property_item.add_value('surface', surface)
-
             # call single element page
             request = Request(property_url, self.parse_single)
             request.meta['loader'] = property_item
@@ -85,29 +79,48 @@ class ElPaisSpider(Spider):
             **dict(
                 zip(feature_names_2, feature_values_2)
             )}
-        item.add_value('features', list(features.items()))
+       
 
-        if('estrato' in features.keys()):
+        features_keys = features.keys()
+        if('ciudad' in features_keys):
+            item.add_value('city', features['ciudad'])
+            features.pop('ciudad')
+
+        if('no. de alcobas' in features_keys):
+            item.add_value('bedrooms', features['no. de alcobas'])
+            features.pop('no. de alcobas')
+
+        if('no. de baños' in features_keys):
+            item.add_value('bathrooms', features['no. de baños'])
+            features.pop('no. de baños')
+
+        if('estrato' in features_keys):
             item.add_value('stratum', features['estrato'])
+            features.pop('estrato')
         elif('estrato' in description):
             item.add_value(
                 'stratum', 
                 re.match('(.*estrato )([\d]*)', description).group(1)
             )
 
-        if('barrio' in features.keys()):
+        if('barrio' in features_keys):
             item.add_value('neighborhood', features['barrio'])
+            features.pop('barrio')
         elif('barrio' in description):
             item.add_value(
                 'neighborhood', 
                 re.match('(.*barrio )([\S]*)', description).group(1)
             )
 
-        if('área' in features.keys()):
-            item.add_value('surface', features['área'])
+        if('área' in features_keys):
+            item.add_value('surface', str(features['área'].split(',')[0]))
+            features.pop('área')
 
-        if('condición' in features.keys()):
-            item.add_value('statuss', features['condición'])
+        if('condición' in features_keys):
+            item.add_value('status', features['condición'])
+            features.pop('condición')
+
+        item.add_value('features', list(features.items()))
 
         # process other features
         other_features = list(

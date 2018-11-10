@@ -10,39 +10,25 @@ import unicodedata
 
 # cleaning and extracting utilities
 def strip_spaces(input):
-    if(isinstance(input, str)):
-        return input.strip('\r\n\t ')
-    else:
-        return list(map(strip_spaces, input))
+    return input.strip('\r\n\t ')
 
 
 def extract_digits(input):
-    if(isinstance(input, str)):
-        return ''.join(re.findall(r'\b\d+\b', input))
-    else:
-        return list(map(extract_digits, input))
+    return ''.join(re.findall(r'\b\d+\b', input))
 
 
 def extract_float(input):
-    if(isinstance(input, str)):
-        return ''.join(re.findall(r'\d+\,\d+', input))
-    else:
-        return list(map(extract_float, input))
+    return ''.join(re.findall(r'\d+\,\d+', input))
 
 
 def convert_lower(input):
-    if(isinstance(input, str)):
-        return input.lower()
-    else:
-        return list(map(convert_lower, input))
+        return str(input).lower()
 
 
 def remove_accents(input):
-    if(isinstance(input, str)):
-        return ''.join((c for c in unicodedata.normalize('NFD', input) if unicodedata.category(c) != 'Mn'))
-    else:
-        return list(map(remove_accents, input))
-
+    return ''.join(
+        (c for c in unicodedata.normalize('NFD', input) if unicodedata.category(c) != 'Mn')
+    )
 
 class PropertyItem(Item):
     internal_id = Field(
@@ -78,7 +64,7 @@ class PropertyItem(Item):
         output_processor=TakeFirst()
     )
     surface = Field(
-        input_processor=MapCompose(extract_float),
+        input_processor=MapCompose(extract_digits),
         output_processor=TakeFirst()
     )
     neighborhood = Field(
