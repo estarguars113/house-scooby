@@ -59,8 +59,8 @@ class ElPaisSpider(Spider):
         item.add_css('contact_info', 'div.info p::text')
 
         # extract feature list
-        feature_names = list(map(lambda x: x.strip().lower()[:-1], response.css('div.caract ul li strong::text').extract())) + \
-            list(map(lambda x: x.strip().lower()[:-1], response.css('div.caract ul:nth-child(2) li strong::text').extract()))
+        feature_names = list(map(lambda x: x.strip().lower()[:-1], response.css('div.caract ul li strong::text').extract()))
+        feature_names_2 = list(map(lambda x: x.strip().lower()[:-1], response.css('div.caract ul:nth-child(2) li strong::text').extract()))
         
         # extract only odd values because of issue format getting values
         feature_values = list(
@@ -68,18 +68,23 @@ class ElPaisSpider(Spider):
                 lambda x: x.strip().lower(),
                 response.css('div.caract ul li:not(strong)::text').extract())
                 
-        )[1::2] + \
-            list(
-                map(
-                    lambda x: x.strip().lower(),
-                    response.css('div.caract ul:nth-child(2) li:not(strong)::text').extract()
-                )
+        )[1::2]
+
+        feature_values_2 = list(
+            map(
+                lambda x: x.strip().lower(),
+                response.css('div.caract ul:nth-child(2) li:not(strong)::text').extract()
             )
+        )[1::2]
 
         # remove empty values before create dict
         feature_values = [v for v in feature_values if v != '']
-        features = dict(zip(feature_names, feature_values))
-        print(features)
+        features = {**dict(
+                zip(feature_names, feature_values)
+            ), 
+            **dict(
+                zip(feature_names_2, feature_values_2)
+            )}
         item.add_value('features', list(features.items()))
 
         if('estrato' in features.keys()):
@@ -100,6 +105,9 @@ class ElPaisSpider(Spider):
 
         if('área' in features.keys()):
             item.add_value('surface', features['área'])
+
+        if('condición' in features.keys()):
+            item.add_value('statuss', features['condición'])
 
         # process other features
         other_features = list(
