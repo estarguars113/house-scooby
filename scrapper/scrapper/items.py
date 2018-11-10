@@ -55,11 +55,11 @@ class PropertyItem(Item):
         output_processor=TakeFirst()
     )
     bathrooms = Field(
-        input_processor=MapCompose(extract_digits),
+        input_processor=MapCompose(remove_tags, extract_digits),
         output_processor=TakeFirst()
     )
     parking_spots = Field(
-        input_processor=MapCompose(extract_digits),
+        input_processor=MapCompose(remove_tags, extract_digits),
         output_processor=TakeFirst()
     )
     surface = Field(
@@ -93,7 +93,7 @@ class PropertyItem(Item):
         output_processor=TakeFirst()
     )
     antiquity = Field(
-        input_processor=MapCompose(strip_spaces),
+        input_processor=MapCompose(remove_accents, strip_spaces),
         output_processor=TakeFirst()
     )
     contact_info = Field()
