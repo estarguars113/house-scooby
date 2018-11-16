@@ -35,7 +35,10 @@ class vivendoSpider(Spider):
             property_item.add_css('responsible', 'div.address::text')
             property_item.add_css('price', '.image .priceCap span::text')
             property_item.add_css('bathrooms', '.views-field-field-banos>div::text')
-            property_item.add_css('bedrooms', '.views-field-field-alcobas>div::text')
+            bedrooms = response.css('.views-field-field-alcobas>div::text').extract_first()
+            if('o' in bedrooms):
+                bedrooms = bedrooms.split('o')[-1].split()
+            property_item.add_value('bedrooms', bedrooms)
 
             # call single element page
             request = Request(property_url, self.parse_single)
@@ -50,10 +53,10 @@ class vivendoSpider(Spider):
         # specific features
         description = response.css('div.field-name-descripcion-custom  .field-item::text').extract_first()
         item.add_value('description', description)
-        item.add_css('name', 'h2.titulo_proyecto::text')
-        item.add_css('surface','div.field-name-field-area-privada .field-item::text')
-        item.add_css('city','#region-area-estado .field-name-field-ciudad .field-item::text')
-        item.add_css('status','#region-area-estado .field-name-field-estados .field-item::text')
+        item.add_value('name', response.css('h2.titulo_proyecto::text').extract_first())
+        item.add_value('surface', response.css('div.field-name-field-area-privada .field-item::text').extract_first())
+        item.add_value('city', response.css('#region-area-estado .field-name-field-ciudad .field-item::text').extract_first())
+        item.add_value('status', response.css('#region-area-estado .field-name-field-estados .field-item::text').extract_first())
 
         # extract features from string
         pattern = r"(.*estrato )(\d+)"
