@@ -60,8 +60,8 @@ class ElPaisSpider(Spider):
         feature_values = list(
             map(
                 lambda x: x.strip().lower(),
-                response.css('div.caract ul li:not(strong)::text').extract())
-                
+                response.css('div.caract ul li:not(strong)::text').extract()
+            )  
         )[1::2]
 
         feature_values_2 = list(
@@ -118,6 +118,14 @@ class ElPaisSpider(Spider):
         if('condición' in features_keys):
             item.add_value('status', features['condición'])
             features.pop('condición')
+
+        if('no. de plantas' in features_keys):
+            item.add_value('total_levels', features['no. de plantas'])
+            features.pop('no. de plantas')
+
+        if('tiempo construido' in features_keys):
+            item.add_value('antiquity', features['tiempo construido'])
+            features.pop('tiempo construido')
 
         item.add_value('features', list(features.items()))
 

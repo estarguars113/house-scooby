@@ -107,6 +107,10 @@ class PropertyItem(Item):
         input_processor=MapCompose(extract_digits),
         output_processor=TakeFirst()
     )
+    total_levels = Field(
+        input_processor=MapCompose(extract_digits),
+        output_processor=TakeFirst()
+    )
     antiquity = Field(
         input_processor=MapCompose(strip_spaces),
         output_processor=TakeFirst()
