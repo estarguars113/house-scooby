@@ -36,7 +36,7 @@ class vivendoSpider(Spider):
             property_item.add_css('price', '.image .priceCap span::text')
             property_item.add_css('bathrooms', '.views-field-field-banos>div::text')
             bedrooms = response.css('.views-field-field-alcobas>div::text').extract_first()
-            if('o' in bedrooms):
+            if(isinstance(bedrooms, str) and 'o' in bedrooms):
                 bedrooms = bedrooms.split('o')[-1].split()
             property_item.add_value('bedrooms', bedrooms)
 
