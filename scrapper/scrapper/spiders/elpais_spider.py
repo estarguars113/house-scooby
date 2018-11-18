@@ -52,6 +52,9 @@ class ElPaisSpider(Spider):
         description = response.css('div.descripcion p::text').extract()
         item.add_css('contact_info', 'div.info p::text')
 
+        # price
+        item.add_value('price', response.css('p.precio::text').extract_first())
+
         # extract feature list
         feature_names = list(map(lambda x: x.strip().lower()[:-1], response.css('div.caract ul li strong::text').extract()))
         feature_names_2 = list(map(lambda x: x.strip().lower()[:-1], response.css('div.caract ul:nth-child(2) li strong::text').extract()))
@@ -112,7 +115,7 @@ class ElPaisSpider(Spider):
             )
 
         if('área' in features_keys):
-            item.add_value('surface', str(features['área'].split(',')[0]))
+            item.add_value('surface', features['área'])
             features.pop('área')
 
         if('condición' in features_keys):
