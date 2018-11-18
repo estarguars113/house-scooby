@@ -85,8 +85,14 @@ class PropertyItem(Item):
         input_processor=MapCompose(strip_spaces),
         output_processor=Join()
     )
-    status = Field()
-    location = Field()
+    status = Field(
+        input_processor=MapCompose(remove_accents),
+        output_processor=TakeFirst(),
+    )
+    location = Field(
+        input_processor=MapCompose(remove_accents),
+        output_processor=TakeFirst(),
+    )
 
     description = Field(
         input_processor=Compose(strip_spaces, convert_lower, remove_accents),
