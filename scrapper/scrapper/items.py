@@ -78,7 +78,7 @@ class PropertyItem(Item):
         output_processor=TakeFirst()
     )
     surface = Field(
-        input_processor=MapCompose(extract_digits),
+        input_processor=MapCompose(extract_float),
         output_processor=TakeFirst()
     )
     neighborhood = Field(
