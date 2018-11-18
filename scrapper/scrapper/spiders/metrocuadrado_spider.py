@@ -14,7 +14,7 @@ class MetroCuadradoSpider(Spider):
     name = "metro_cuadrado"
     allowed_domains = ["metrocuadrado.com"]
 
-    def __init__(self, max_prixe='10000000', **kwargs):
+    def __init__(self, max_prixe='100000000', **kwargs):
         self.max_price = max_prixe
         super().__init__(**kwargs)
 
@@ -40,12 +40,6 @@ class MetroCuadradoSpider(Spider):
                 item.css('div.detail_wrap .m_rs_list_item_main .header a.data-details-id::attr(href)').extract_first())
 
             property_item.add_value('link', property_url)
-            property_item.add_css(
-                'bedrooms', 'div.detail_wrap .m_rs_list_item_main .price_desc .rooms span:nth-child(2)::text')
-            property_item.add_css(
-                'bathrooms', 'div.detail_wrap .m_rs_list_item_main .price_desc .bathrooms span:nth-child(2)::text')
-            property_item.add_css(
-                'price', 'div.detail_wrap .m_rs_list_item_main .price_desc p.price span:nth-child(2)::text')
             property_item.add_value('surface', item.css(
                 'div.detail_wrap .m_rs_list_item_main .m2 p>span:nth-child(2)::text').extract_first().replace(".", ","))
 
@@ -66,12 +60,20 @@ class MetroCuadradoSpider(Spider):
     def parse_single(self, response):
         item = response.meta['loader']
         feature_names = response.css('div.m_property_info_details:not(.more_info)>dl dt>h3::text').extract()
-        feature_values = response.css('div.m_property_info_details:not(.more_info)>dl dd>h4::text').extract()
+        feature_values = [v for v in response.css('div.m_property_info_details:not(.more_info)>dl dd>h4::text').extract() if v.strip() != '']
         features_dict = dict(zip(feature_names, feature_values))
-        item.add_value('internal_id', features_dict.pop('Código web'))
+        
+        item.add_value('internal_id', features_dict.pop('Código web', ''))
         item.add_value('neighborhood', features_dict.pop('Nombre común del barrio ', ''))
         item.add_value('stratum', features_dict.pop('Estrato', ''))
         item.add_value('parking_spots', features_dict.pop('Parqueadero', ''))
+        item.add_value('bedrooms', features_dict.pop('Habitaciones', ''))
+        item.add_value('bathrooms', features_dict.pop('Baños', ''))
+        item.add_value('floor_location', features_dict.pop('Número de piso', '1'))
+        item.add_value('antiquity', features_dict.pop('Tiempo de construido', ''))
+
+        price = response.css('dl.price dd::text').extract_first()
+        item.add_value('price', price)
 
         extra_feature_names = response.css('div.m_property_info_details.more_info>dl dt>h3::text').extract()
         extra_feature_values = response.css('div.m_property_info_details.more_info>dl dd>h4::text').extract()
