@@ -38,16 +38,22 @@ class MetroCuadradoSpider(Spider):
 
             property_url = response.urljoin(
                 item.css('div.detail_wrap .m_rs_list_item_main .header a.data-details-id::attr(href)').extract_first())
-            
+
             property_item.add_value('link', property_url)
-            property_item.add_css('bedrooms', 'div.detail_wrap .m_rs_list_item_main .price_desc .rooms span:nth-child(2)::text')
-            property_item.add_css('bathrooms', 'div.detail_wrap .m_rs_list_item_main .price_desc .bathrooms span:nth-child(2)::text')
-            property_item.add_css('price', 'div.detail_wrap .m_rs_list_item_main .price_desc p.price span:nth-child(2)::text')
+            property_item.add_css(
+                'bedrooms', 'div.detail_wrap .m_rs_list_item_main .price_desc .rooms span:nth-child(2)::text')
+            property_item.add_css(
+                'bathrooms', 'div.detail_wrap .m_rs_list_item_main .price_desc .bathrooms span:nth-child(2)::text')
+            property_item.add_css(
+                'price', 'div.detail_wrap .m_rs_list_item_main .price_desc p.price span:nth-child(2)::text')
+            property_item.add_value('surface', item.css(
+                'div.detail_wrap .m_rs_list_item_main .m2 p>span:nth-child(2)::text').extract_first().replace(".", ","))
 
             # call single element page
-            request = Request(property_url, self.parse_single, meta={'loader': property_item})
+            request = Request(property_url, self.parse_single,
+                              meta={'loader': property_item})
             yield request
-        
+
         current_url = response.request.url
         next_page_pattern = r"(.*currentPage=)(\d+)"
         next_page = str(
@@ -59,27 +65,17 @@ class MetroCuadradoSpider(Spider):
 
     def parse_single(self, response):
         item = response.meta['loader']
-        item.add_value(
-            'internal_id',
-            response.css('div.m_property_info_details:not(.more_info)>dl:nth-child(2) dd>h4::text').extract_first()
-        )
-        item.add_value(
-            'neighborhood',
-            response.css('div.m_property_info_details:not(.more_info)>dl:nth-child(3) dd>h4::text').extract_first()
-        )
-        item.add_value(
-            'stratum',
-            response.css('div.m_property_info_details:not(.more_info)>dl:nth-child(4) dd>h4::text').extract_first()
-        )
-        item.add_value(
-            'surface',
-            response.css('div.m_property_info_table>dl:nth-child(2)::text').extract_first()
-        )
-        item.add_value(
-            'parking_spots',
-            response.css('div.m_property_info_table>dl:last-child dd::text').extract_first()
-        )
-        features = response.css('div.m_property_info_details.services ul li::text').extract()
-        item.add_value('features',  features)
+        feature_names = response.css('div.m_property_info_details:not(.more_info)>dl dt>h3::text').extract()
+        feature_values = response.css('div.m_property_info_details:not(.more_info)>dl dd>h4::text').extract()
+        features_dict = dict(zip(feature_names, feature_values))
+        item.add_value('internal_id', features_dict.pop('Código web'))
+        item.add_value('neighborhood', features_dict.pop('Nombre común del barrio ', ''))
+        item.add_value('stratum', features_dict.pop('Estrato', ''))
+        item.add_value('parking_spots', features_dict.pop('Parqueadero', ''))
+
+        extra_feature_names = response.css('div.m_property_info_details.more_info>dl dt>h3::text').extract()
+        extra_feature_values = response.css('div.m_property_info_details.more_info>dl dd>h4::text').extract()
+        extra_features_dict = dict(zip(extra_feature_names, extra_feature_values))
+        item.add_value('features',  extra_features_dict)
 
         yield item.load_item()
