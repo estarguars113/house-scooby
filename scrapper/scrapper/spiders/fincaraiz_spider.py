@@ -16,7 +16,7 @@ class FincaRaizSpider(Spider):
     # cities = ['cali', 'jamundi', 'palmira']
     min_price = '0'
 
-    def __init__(self, max_prixe='10000000', **kwargs):
+    def __init__(self, max_prixe='100000', **kwargs):
         self.max_price = max_prixe
         super().__init__(**kwargs)
 
@@ -31,7 +31,7 @@ class FincaRaizSpider(Spider):
 
     def parse(self, response):
         # by default the first one it's advertising, so skip if there's only one remaining
-        if len(response.css('ul.advert').extract()) == 1:
+        if len(response.css('ul.advert').extract()) < 2:
             return
         else:
             for item in response.css('ul.advert'):
