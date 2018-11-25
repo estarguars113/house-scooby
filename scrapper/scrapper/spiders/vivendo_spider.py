@@ -49,6 +49,8 @@ class vivendoSpider(Spider):
         item = response.meta['loader']
 
         # to-do internal unique identifier
+        general_type = response.css('#encabezado-izquierdo-texto .field-type-ds .field-item::text').extract_first()
+        property_type = re.match(r"(.*)( en)", general_type).group(1)
 
         # specific features
         description = response.css('div.field-name-descripcion-custom  .field-item::text').extract_first()
@@ -57,6 +59,7 @@ class vivendoSpider(Spider):
         item.add_value('surface', response.css('div.field-name-field-area-privada .field-item::text').extract_first().replace(".", ","))
         item.add_value('city', response.css('#region-area-estado .field-name-field-ciudad .field-item::text').extract_first())
         item.add_value('status', response.css('#region-area-estado .field-name-field-estados .field-item::text').extract_first())
+        item.add_value('property_type', property_type)
 
         # extract features from string
         pattern = r"(.*estrato )(\d+)"
