@@ -58,6 +58,10 @@ class PropertyItem(Item):
         input_processor=MapCompose(strip_spaces, remove_accents),
         output_processor=TakeFirst()
     )
+    property_type = Field(
+        input_processor=MapCompose(remove_tags, strip_spaces, remove_accents),
+        output_processor=TakeFirst()
+    )
     link = Field(
         input_processor=MapCompose(strip_spaces),
         output_processor=TakeFirst()
