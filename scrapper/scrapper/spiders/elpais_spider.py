@@ -56,7 +56,7 @@ class ElPaisSpider(Spider):
         general_type = response.css('.nombre-proyecto h1').extract_first()
         print(general_type)
         if(general_type):
-            property_type = general_type.split(',')[0]
+            property_type = general_type.split(',')[0][:-1]
             item.add_value('property_type', property_type)
 
         # price

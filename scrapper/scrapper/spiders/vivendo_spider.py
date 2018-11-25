@@ -50,7 +50,7 @@ class vivendoSpider(Spider):
 
         # to-do internal unique identifier
         general_type = response.css('#encabezado-izquierdo-texto .field-type-ds .field-item::text').extract_first()
-        property_type = re.match(r"(.*)( en)", general_type).group(1)
+        property_type = re.match(r"(.*)( en)", general_type).group(1)[:-1]
 
         # specific features
         description = response.css('div.field-name-descripcion-custom  .field-item::text').extract_first()
