@@ -115,7 +115,7 @@ class ElPaisSpider(Spider):
             )
 
         if('área' in features_keys):
-            item.add_value('surface', features['área'])
+            item.add_value('surface', features['área'].replace(",", "."))
             features.pop('área')
 
         if('condición' in features_keys):
