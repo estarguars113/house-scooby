@@ -11,17 +11,17 @@ class FincaRaizSpider(Spider):
     name = "finca_raiz"
     allowed_domains = ["fincaraiz.com.co"]
     # types = ['apartamento', 'casa-lote', 'casa-campestre', 'casa', 'lote', 'finca']
-    types = ['casa']
+    types = ['casa', 'lote', 'apartamento']
     cities = ['cali']
     # cities = ['cali', 'jamundi', 'palmira']
     min_price = '0'
 
-    def __init__(self, max_prixe='100000', **kwargs):
+    def __init__(self, max_prixe='10000000', **kwargs):
         self.max_price = max_prixe
         super().__init__(**kwargs)
 
     def start_requests(self):
-        base_url = 'https://www.fincaraiz.com.co/{0}/venta/{1}/?ad=30|1||||1||8,21,23,7|||82|8200006|8200104|{2}|{3}||||||||||||||||1||griddate%20desc||||-1||'
+        base_url = 'https://www.fincaraiz.com.co/{0}/venta/{1}/?ad=30|1||||1||8,23|||82|8200006||{2}|{3}||||||||||||||||1||griddate%20desc||||-1||'
         for t in self.types:
             for c in self.cities:
                 yield Request(
