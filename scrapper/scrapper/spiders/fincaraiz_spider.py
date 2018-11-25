@@ -42,6 +42,9 @@ class FincaRaizSpider(Spider):
                         'li.information .title-grid a::attr(title)').extract_first()
                 property_item.add_value('name', name)
 
+                property_type = name.split(' en ')[0]
+                property_item.add_value('property_type', property_type)
+
                 price = item.css('li.price div:first-child meta::attr(content)').extract_first() or \
                     item.css(
                         'li.information .title-grid .descriptionPrice::text').extract_first()
