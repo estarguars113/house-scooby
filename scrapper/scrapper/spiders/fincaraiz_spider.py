@@ -11,7 +11,7 @@ class FincaRaizSpider(Spider):
     name = "finca_raiz"
     allowed_domains = ["fincaraiz.com.co"]
     # types = ['apartamento', 'casa-lote', 'casa-campestre', 'casa', 'lote', 'finca']
-    types = ['casa']
+    types = ['casa', 'lote', 'apartamento']
     cities = ['cali']
     # cities = ['cali', 'jamundi', 'palmira']
     min_price = '0'
@@ -21,7 +21,7 @@ class FincaRaizSpider(Spider):
         super().__init__(**kwargs)
 
     def start_requests(self):
-        base_url = 'https://www.fincaraiz.com.co/{0}/venta/{1}/?ad=30|1||||1||8,21,23,7|||82|8200006|8200104|{2}|{3}||||||||||||||||1||griddate%20desc||||-1||'
+        base_url = 'https://www.fincaraiz.com.co/{0}/venta/{1}/?ad=30|1||||1||8,23|||82|8200006||{2}|{3}||||||||||||||||1||griddate%20desc||||-1||'
         for t in self.types:
             for c in self.cities:
                 yield Request(
@@ -30,45 +30,49 @@ class FincaRaizSpider(Spider):
                 )
 
     def parse(self, response):
-        for item in response.css('ul.advert'):
-            property_item = ItemLoader(item=PropertyItem(), response=response)
-            # clean input data
-            name = item.css('li.title-grid .span-title>a h2.h2-grid::text').extract_first() or \
-                item.css(
-                    'li.information .title-grid a::attr(title)').extract_first()
-            property_item.add_value('name', name)
+        # by default the first one it's advertising, so skip if there's only one remaining
+        if len(response.css('ul.advert').extract()) < 2:
+            return
+        else:
+            for item in response.css('ul.advert'):
+                property_item = ItemLoader(item=PropertyItem(), response=response)
+                # clean input data
+                name = item.css('li.title-grid .span-title>a h2.h2-grid::text').extract_first() or \
+                    item.css(
+                        'li.information .title-grid a::attr(title)').extract_first()
+                property_item.add_value('name', name)
 
-            price = item.css('li.price div:first-child meta::attr(content)').extract_first() or \
-                item.css(
-                    'li.information .title-grid .descriptionPrice::text').extract_first()
-            property_item.add_value('price', price)
+                price = item.css('li.price div:first-child meta::attr(content)').extract_first() or \
+                    item.css(
+                        'li.information .title-grid .descriptionPrice::text').extract_first()
+                property_item.add_value('price', price)
 
-            full_location = item.css(
-                'li.title-grid .span-title>a>div:last-child::text').extract_first()
-            neighborhood, city = full_location.split(
-                '-') if full_location else ["", ""]
+                full_location = item.css(
+                    'li.title-grid .span-title>a>div:last-child::text').extract_first()
+                neighborhood, city = full_location.split(
+                    '-') if full_location else ["", ""]
 
-            property_url = response.urljoin(
-                item.css('li.title-grid .span-title>a::attr(href)').extract_first())
-            property_item.add_value('link', property_url)
-            property_item.add_css('bedrooms', 'li.surface>div::text')
-            property_item.add_value('neighborhood', neighborhood)
-            property_item.add_value('city', city)
+                property_url = response.urljoin(
+                    item.css('li.title-grid .span-title>a::attr(href)').extract_first())
+                property_item.add_value('link', property_url)
+                property_item.add_css('bedrooms', 'li.surface>div::text')
+                property_item.add_value('neighborhood', neighborhood)
+                property_item.add_value('city', city)
 
-            # call single element page
-            request = Request(property_url, self.parse_single)
-            request.meta['loader'] = property_item
-            yield request
+                # call single element page
+                request = Request(property_url, self.parse_single)
+                request.meta['loader'] = property_item
+                yield request
 
-        current_url = response.request.url
-        next_page_pattern = r"(.*ad=30\|)(\d+)"
-        next_page = str(
-            int(re.match(next_page_pattern, current_url).group(2)) + 1)
+            current_url = response.request.url
+            next_page_pattern = r"(.*ad=30\|)(\d+)"
+            next_page = str(
+                int(re.match(next_page_pattern, current_url).group(2)) + 1)
 
-        next_url = re.sub(next_page_pattern, fr'\g<1>{next_page}', current_url)
-        if next_url is not None:
-            next_url = response.urljoin(next_url)
-            yield Request(next_url, self.parse)
+            next_url = re.sub(next_page_pattern, fr'\g<1>{next_page}', current_url)
+            if next_url is not None:
+                next_url = response.urljoin(next_url)
+                yield Request(next_url, self.parse)
 
     def parse_single(self, response):
         item = response.meta['loader']
@@ -94,17 +98,17 @@ class FincaRaizSpider(Spider):
             'div.features_2 li::text').extract() if fv.strip() != '']
         features_dict = dict(zip(feature_names, feature_values))
         if('Estrato:' in feature_names):
-            item.add_value('stratum', features_dict['Estrato:'])
+            item.add_value('stratum', features_dict.pop('Estrato:', ''))
 
         if('Antigüedad:' in feature_names):
-            item.add_value('antiquity', features_dict['Antigüedad:'])
+            item.add_value('antiquity', features_dict.pop('Antigüedad:', ''))
 
         if('Área Const.:' in feature_names):
             item.add_value(
-                'surface', features_dict['Área Const.:'].replace(".", ""))
+                'surface', features_dict.pop('Área Const.:', '').replace(".", ""))
         elif('Área privada:' in feature_names):
             item.add_value(
-                'surface', features_dict['Área privada:'].replace(".", ""))
+                'surface', features_dict.pop('Área privada:', '').replace(".", ""))
 
         # extract text
         item.add_value('description', response.css(
