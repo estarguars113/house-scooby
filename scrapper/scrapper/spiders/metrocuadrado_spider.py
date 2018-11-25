@@ -31,10 +31,13 @@ class MetroCuadradoSpider(Spider):
             description = item.css(
                 'div.detail_wrap .m_rs_list_item_details .desc p:last-child::text').extract_first()
             city = name.split(' ')[-1]
+            type_regex = r"(.*)(en Venta)"
+            property_type = re.match(type_regex, name).group(1)
 
             property_item.add_value('name', name)
             property_item.add_value('city', city)
             property_item.add_value('description', description)
+            property_item.add_value('property_type', property_type)
 
             property_url = response.urljoin(
                 item.css('div.detail_wrap .m_rs_list_item_main .header a.data-details-id::attr(href)').extract_first())
@@ -62,6 +65,7 @@ class MetroCuadradoSpider(Spider):
         feature_names = response.css('div.m_property_info_details:not(.more_info)>dl dt>h3::text').extract()
         feature_values = [v for v in response.css('div.m_property_info_details:not(.more_info)>dl dd>h4::text').extract() if v.strip() != '']
         features_dict = dict(zip(feature_names, feature_values))
+        print(features_dict)
         
         item.add_value('internal_id', features_dict.pop('Código web', ''))
         item.add_value('neighborhood', features_dict.pop('Nombre común del barrio ', ''))
@@ -71,6 +75,7 @@ class MetroCuadradoSpider(Spider):
         item.add_value('bathrooms', features_dict.pop('Baños', ''))
         item.add_value('floor_location', features_dict.pop('Número de piso', '1'))
         item.add_value('antiquity', features_dict.pop('Tiempo de construido', ''))
+        item.add_value('status', features_dict.pop('Etapa de construcción/Tiempo de construido', ''))
 
         price = response.css('dl.price dd::text').extract_first()
         item.add_value('price', price)
