@@ -44,7 +44,7 @@ class MetroCuadradoSpider(Spider):
 
             property_item.add_value('link', property_url)
             property_item.add_value('surface', item.css(
-                'div.detail_wrap .m_rs_list_item_main .m2 p>span:nth-child(2)::text').extract_first().replace(".", ","))
+                'div.detail_wrap .m_rs_list_item_main .m2 p>span:nth-child(2)::text').extract_first())
 
             # call single element page
             request = Request(property_url, self.parse_single,

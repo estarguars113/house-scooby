@@ -21,8 +21,13 @@ def extract_digits(input):
 
 
 def extract_float(input):
-    return ''.join(re.findall(r'\d+\,\d+', input))
+    return float(''.join(re.findall(r'\d+\.\d+', input)))
 
+def parse_int(input):
+    try:
+        return int(input)
+    except ValueError:
+        return None
 
 def convert_lower(input):
     if(isinstance(input, str)):
@@ -66,19 +71,19 @@ class PropertyItem(Item):
         output_processor=Join()
     )
     price = Field(
-        input_processor=MapCompose(extract_digits),
+        input_processor=MapCompose(extract_digits, float),
         output_processor=TakeFirst()
     )
     bedrooms = Field(
-        input_processor=MapCompose(extract_digits),
+        input_processor=MapCompose(extract_digits, parse_int),
         output_processor=TakeFirst()
     )
     bathrooms = Field(
-        input_processor=MapCompose(remove_tags, extract_digits),
+        input_processor=MapCompose(remove_tags, extract_digits, parse_int),
         output_processor=TakeFirst()
     )
     parking_spots = Field(
-        input_processor=MapCompose(remove_tags, extract_digits),
+        input_processor=MapCompose(remove_tags, extract_digits, parse_int),
         output_processor=TakeFirst()
     )
     surface = Field(
@@ -108,17 +113,17 @@ class PropertyItem(Item):
         output_processor=TakeFirst()
     )
     stratum = Field(
-        input_processor=MapCompose(extract_digits),
+        input_processor=MapCompose(extract_digits, parse_int),
         output_processor=TakeFirst()
     )
     features = Field()
     other_features = Field()
     floor_location = Field(
-        input_processor=MapCompose(extract_digits),
+        input_processor=MapCompose(extract_digits, parse_int),
         output_processor=TakeFirst()
     )
     total_levels = Field(
-        input_processor=MapCompose(extract_digits),
+        input_processor=MapCompose(extract_digits, parse_int),
         output_processor=TakeFirst()
     )
     antiquity = Field(

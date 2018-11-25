@@ -108,10 +108,10 @@ class FincaRaizSpider(Spider):
 
         if('Área Const.:' in feature_names):
             item.add_value(
-                'surface', features_dict.pop('Área Const.:', '').replace(".", ""))
+                'surface', features_dict.pop('Área Const.:', '').replace(",", "."))
         elif('Área privada:' in feature_names):
             item.add_value(
-                'surface', features_dict.pop('Área privada:', '').replace(".", ""))
+                'surface', features_dict.pop('Área privada:', '').replace(",", "."))
 
         # extract text
         item.add_value('description', response.css(
