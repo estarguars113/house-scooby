@@ -54,7 +54,7 @@ class vivendoSpider(Spider):
         description = response.css('div.field-name-descripcion-custom  .field-item::text').extract_first()
         item.add_value('description', description)
         item.add_value('name', response.css('h2.titulo_proyecto::text').extract_first())
-        item.add_value('surface', response.css('div.field-name-field-area-privada .field-item::text').extract_first().replace(".", ","))
+        item.add_value('surface', response.css('div.field-name-field-area-privada .field-item::text').extract_first())
         item.add_value('city', response.css('#region-area-estado .field-name-field-ciudad .field-item::text').extract_first())
         item.add_value('status', response.css('#region-area-estado .field-name-field-estados .field-item::text').extract_first())
 
