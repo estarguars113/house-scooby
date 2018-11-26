@@ -11,8 +11,8 @@ process = CrawlerProcess({
   'DOWNLOAD_DELAY': 5,
   'RANDOMIZE_DOWNLOAD_DELAY': True,
   'USER_AGENT': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)',
-  'FEED_FORMAT': 'json',
-  'FEED_URI': 'result.json'
+  'FEED_FORMAT': 'jsonlines',
+  'FEED_URI': 'result.jsonl'
 })
 
 kwargs = { 'max_price': '300000000' }
