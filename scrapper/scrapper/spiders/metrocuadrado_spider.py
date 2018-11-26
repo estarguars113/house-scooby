@@ -24,6 +24,8 @@ class MetroCuadradoSpider(Spider):
         return [FormRequest(url, method='POST', callback=self.parse) for url in self.start_urls]
 
     def parse(self, response):
+        if(response.css('div.listado_mensaje_resultados').extract_first()):
+            return
         for item in response.css('div#main .m_rs_list_item'):
             property_item = ItemLoader(item=PropertyItem(), response=response)
             name = item.css(
@@ -65,8 +67,7 @@ class MetroCuadradoSpider(Spider):
         feature_names = response.css('div.m_property_info_details:not(.more_info)>dl dt>h3::text').extract()
         feature_values = [v for v in response.css('div.m_property_info_details:not(.more_info)>dl dd>h4::text').extract() if v.strip() != '']
         features_dict = dict(zip(feature_names, feature_values))
-        print(features_dict)
-        
+
         item.add_value('internal_id', features_dict.pop('Código web', ''))
         item.add_value('neighborhood', features_dict.pop('Nombre común del barrio ', ''))
         item.add_value('stratum', features_dict.pop('Estrato', ''))

@@ -16,7 +16,7 @@ class FincaRaizSpider(Spider):
     # cities = ['cali', 'jamundi', 'palmira']
     min_price = '0'
 
-    def __init__(self, max_prixe='10000000', **kwargs):
+    def __init__(self, max_prixe='300000000', **kwargs):
         self.max_price = max_prixe
         super().__init__(**kwargs)
 
@@ -53,7 +53,7 @@ class FincaRaizSpider(Spider):
                 full_location = item.css(
                     'li.title-grid .span-title>a>div:last-child::text').extract_first()
                 neighborhood, city = full_location.split(
-                    '-') if full_location else ["", ""]
+                    '-') if full_location and '-' in full_location else ["", full_location]
 
                 property_url = response.urljoin(
                     item.css('li.title-grid .span-title>a::attr(href)').extract_first())
@@ -108,10 +108,10 @@ class FincaRaizSpider(Spider):
 
         if('Área Const.:' in feature_names):
             item.add_value(
-                'surface', features_dict.pop('Área Const.:', '').replace(",", "."))
+                'surface', features_dict.pop('Área Const.:', '').split("a")[-1].replace(",", "."))
         elif('Área privada:' in feature_names):
             item.add_value(
-                'surface', features_dict.pop('Área privada:', '').replace(",", "."))
+                'surface', features_dict.pop('Área privada:', '').split("a")[-1].replace(",", "."))
 
         # extract text
         item.add_value('description', response.css(
