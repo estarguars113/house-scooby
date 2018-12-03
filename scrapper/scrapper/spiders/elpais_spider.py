@@ -31,6 +31,7 @@ class ElPaisSpider(Spider):
             )
             property_url = response.urljoin(item.css('div.info>a.link-info::attr(href)').extract_first())
             property_item.add_value('link', property_url)
+
             # call single element page
             request = Request(property_url, self.parse_single)
             request.meta['loader'] = property_item
@@ -51,6 +52,11 @@ class ElPaisSpider(Spider):
         # general desc
         description = response.css('div.descripcion p::text').extract()
         item.add_css('contact_info', 'div.info p::text')
+
+        general_type = response.css('.nombre-proyecto h1').extract_first()
+        if(general_type):
+            property_type = general_type.split(',')[0][:-1]
+            item.add_value('property_type', property_type)
 
         # price
         item.add_value('price', response.css('p.precio::text').extract_first())
