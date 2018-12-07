@@ -91,7 +91,6 @@ class FincaRaizSpider(Spider):
 
         neighborhood = response.css('div.breadcrumb.left a:last-of-type::text').extract_first()
         city = response.css('div.breadcrumb.left a:nth-of-type(3)::text').extract_first()
-        print(city, neighborhood)
 
         item.add_value('neighborhood', neighborhood)
         item.add_value('city', city)
