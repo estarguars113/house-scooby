@@ -65,7 +65,7 @@ class FincaRaizSpider(Spider):
             next_page = str(
                 int(re.match(next_page_pattern, current_url).group(2)) + 1)
 
-            next_url = re.sub(next_page_pattern, fr'\g<1>{next_page}', current_url)
+            next_url = re.sub(next_page_pattern, r'\g<1>{next_page}', current_url)
             if next_url is not None:
                 next_url = response.urljoin(next_url)
                 yield Request(next_url, self.parse)

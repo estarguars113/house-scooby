@@ -91,7 +91,7 @@ class PropertyItem(Item):
         output_processor=TakeFirst()
     )
     neighborhood = Field(
-        input_processor=MapCompose(strip_spaces),
+        input_processor=MapCompose(strip_spaces, remove_accents),
         output_processor=Join()
     )
     status = Field(
