@@ -49,19 +49,12 @@ class FincaRaizSpider(Spider):
                     item.css(
                         'li.information .title-grid .descriptionPrice::text').extract_first()
                 property_item.add_value('price', price)
-
-                full_location = item.css(
-                    'li.title-grid .span-title>a>div:last-child::text').extract_first()
-                neighborhood, city = full_location.split(
-                    '-') if full_location and '-' in full_location else ["", full_location]
-
+                
                 property_url = response.urljoin(
                     item.css('li.title-grid .span-title>a::attr(href)').extract_first())
                 property_item.add_value('link', property_url)
                 property_item.add_css('bedrooms', 'li.surface>div::text')
-                property_item.add_value('neighborhood', neighborhood)
-                property_item.add_value('city', city)
-
+                
                 # call single element page
                 request = Request(property_url, self.parse_single)
                 request.meta['loader'] = property_item
@@ -95,6 +88,13 @@ class FincaRaizSpider(Spider):
             'parking_spots',
             response.css('div.features>span:nth-child(4)').extract_first()
         )
+
+        neighborhood = response.css('div.breadcrumb.left a:last-of-type::text').extract_first()
+        city = response.css('div.breadcrumb.left a:nth-of-type(3)::text').extract_first()
+
+        item.add_value('neighborhood', neighborhood)
+        item.add_value('city', city)
+
 
         feature_names = response.css('div.features_2 li>b::text').extract()
         feature_values = [fv for fv in response.css(
