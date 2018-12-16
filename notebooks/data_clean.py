@@ -1,5 +1,5 @@
 import pandas as pd
-
+from os import environ
 
 def build_features_dict(field):
     if(isinstance(field, dict)):
@@ -32,10 +32,12 @@ def load_dataframe(path):
 
     # fill empty values
     df['description'].fillna('', inplace=True)
+    df['neighborhood'].fillna('sin barrio', inplace=True)
     df['features'].fillna({}, inplace=True)
     df['other_features'].fillna({}, inplace=True)
     df['name'].fillna('', inplace=True)
     df['status'].fillna('usado', inplace=True)
+    df.fillna(0, inplace=True)
 
     # format dictionaries
     df['features'] = df.apply(
@@ -47,8 +49,9 @@ def load_dataframe(path):
     df['description'] = df['description'].str.lower()
     df['name'] = df['name'].str.lower()
     df['status'] = df['status'].str.lower()
-    df['city'] = df['city'].str.lower()
+    df['city'] = df['city'].apply(lambda x: x.lower().replace('.', ''))
     df['property_type'] = df['property_type'].str.lower()
+    df['neighborhood'] = df['neighborhood'].str.lower()
     df['features'] = df.apply(lambda x: lower_case_features(x['features']), axis=1)
     df['other_features'] = df.apply(lambda x: lower_case_features(x['other_features']), axis=1)
 
@@ -59,8 +62,12 @@ def load_dataframe(path):
     df['terrace'] = df.apply(lambda x: find_feature(x, 'terraza'), axis=1)
     df['residencial_building'] = df.apply(lambda x: find_feature(x, 'unidad'), axis=1)
     df['pool'] = df.apply(lambda x: find_feature(x, 'piscina'), axis=1)
-
     df = pd.get_dummies(df, columns=['status', 'city', 'property_type'])
+    
+    # delete useless features
+    df.drop(['antiquity', 'location', 'description', 'name', 'responsible', 'internal_id', 'features', 'other_features'], inplace=True, axis=1)
+
+    df.to_csv('../data/processed/clean_data.csv', index=False)
 
 if __name__ == "__main__":
     load_dataframe('../data/raw/result.jsonl')

@@ -8,7 +8,7 @@ import scrapy
 from scrapy.crawler import CrawlerProcess
 
 process = CrawlerProcess({
-  'DOWNLOAD_DELAY': 5,
+  'DOWNLOAD_DELAY': 3,
   'RANDOMIZE_DOWNLOAD_DELAY': True,
   'USER_AGENT': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)',
   'FEED_FORMAT': 'jsonlines',

@@ -27,7 +27,7 @@ ROBOTSTXT_OBEY = False
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 5
+DOWNLOAD_DELAY = 3
 RANDOMIZE_DOWNLOAD_DELAY = True
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
@@ -57,7 +57,7 @@ RANDOMIZE_DOWNLOAD_DELAY = True
 #    'scrapper.middlewares.ScrapperDownloaderMiddleware': 543,
 #}
 # After 10 drops the spider will be closed
-CLOSESPIDER_DROP_ITEM_COUNT = 10
+# CLOSESPIDER_DROP_ITEM_COUNT = 10
 
 # Enable or disable extensions
 # See https://doc.scrapy.org/en/latest/topics/extensions.html
