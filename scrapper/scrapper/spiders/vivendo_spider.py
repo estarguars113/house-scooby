@@ -33,7 +33,6 @@ class vivendoSpider(Spider):
 
             property_item.add_value('link', property_url)
             property_item.add_css('responsible', 'div.address::text')
-            property_item.add_css('price', '.image .priceCap span::text')
             property_item.add_css('bathrooms', '.views-field-field-banos>div::text')
             bedrooms = response.css('.views-field-field-alcobas>div::text').extract_first()
             if(isinstance(bedrooms, str) and 'o' in bedrooms):
@@ -57,6 +56,7 @@ class vivendoSpider(Spider):
         item.add_value('description', description)
         item.add_value('name', response.css('h2.titulo_proyecto::text').extract_first())
         item.add_value('surface', response.css('div.field-name-field-area-privada .field-item::text').extract_first())
+        item.add_value('price', response.css('div.field-name-field-precio div.field-items>div::text').extract_first())
         item.add_value('city', response.css('#region-area-estado .field-name-field-ciudad .field-item::text').extract_first())
         item.add_value('status', response.css('#region-area-estado .field-name-field-estados .field-item::text').extract_first())
         item.add_value('property_type', property_type)
