@@ -65,7 +65,7 @@ def load_dataframe(path):
     df = pd.get_dummies(df, columns=['status', 'city', 'property_type'])
     
     # delete useless features
-    df.drop(['antiquity', 'location', 'description', 'name', 'responsible', 'internal_id', 'features', 'other_features'], inplace=True, axis=1)
+    df.drop(['antiquity', 'description', 'name', 'internal_id', 'features', 'other_features'], inplace=True, axis=1)
 
     df.to_csv('../data/processed/clean_data.csv', index=False)
 
