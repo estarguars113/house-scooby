@@ -81,6 +81,10 @@ class FincaRaizSpider(Spider):
             response.css('div.badge_used::text').extract_first()
         )
         item.add_value(
+            'publication_date',
+            response.css('div.historyAdvert .boxcube ul li::first-child span::text').extract_first()
+        )
+        item.add_value(
             'bathrooms',
             response.css('div.features>span:nth-child(3)').extract_first()
         )
@@ -94,7 +98,6 @@ class FincaRaizSpider(Spider):
 
         item.add_value('neighborhood', neighborhood)
         item.add_value('city', city)
-
 
         feature_names = response.css('div.features_2 li>b::text').extract()
         feature_values = [fv for fv in response.css(

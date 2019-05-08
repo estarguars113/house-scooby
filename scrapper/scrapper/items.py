@@ -29,6 +29,7 @@ def parse_int(input):
     except ValueError:
         return None
 
+
 def convert_lower(input):
     if(isinstance(input, str)):
         return str(input).lower()
@@ -56,6 +57,10 @@ class PropertyItem(Item):
     )
     name = Field(
         input_processor=MapCompose(strip_spaces, remove_accents),
+        output_processor=TakeFirst()
+    )
+    publication_date = Field(
+        input_processor=MapCompose(strip_spaces),
         output_processor=TakeFirst()
     )
     property_type = Field(

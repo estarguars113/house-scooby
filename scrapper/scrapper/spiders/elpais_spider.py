@@ -49,6 +49,10 @@ class ElPaisSpider(Spider):
         internal_id = response.css('.id-web p.id').extract_first().split(':')[1]
         item.add_value('internal_id', internal_id)
 
+        # publication date
+        publication_date = response.css('span.publicado').extract_first()
+        item.add_value('publication_date', publication_dateW)
+
         # general desc
         description = response.css('div.descripcion p::text').extract()
         item.add_css('contact_info', 'div.info p::text')
